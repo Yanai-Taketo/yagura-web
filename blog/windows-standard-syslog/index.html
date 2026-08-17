@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢 | Yagura 読みもの</title>
+  <meta name="description" content="Windows Server の標準機能だけで syslog を受信できるのか？ 結論と理由を解説。イベントログや Windows イベント転送（WEF）との違い、Linux 併用・商用製品・Windows ネイティブ OSS という現実的な選択肢を比較します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/windows-standard-syslog/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢">
+  <meta property="og:description" content="Windows 標準に syslog 受信機能はあるのか。結論と、Windows 環境での現実的な選択肢を整理。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/windows-standard-syslog/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢",
+  "description": "Windows 標準に syslog 受信機能はあるのか。結論と、Windows 環境での現実的な選択肢を整理。",
+  "url": "https://yagura.ta-yan.ai/blog/windows-standard-syslog/",
+  "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/windows-standard-syslog/",
+  "datePublished": "2026-07-26",
+  "dateModified": "2026-07-26",
+  "inLanguage": "ja",
+  "image": "https://yagura.ta-yan.ai/images/ogp.png",
+  "author": {
+    "@type": "Person",
+    "name": "YANAI Taketo",
+    "url": "https://github.com/Yanai-Taketo"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "YANAI Taketo"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Yagura",
+      "item": "https://yagura.ta-yan.ai/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "読みもの",
+      "item": "https://yagura.ta-yan.ai/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>Windows 標準で syslog 受信は可能か</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">疑問</p>
+      <h1>Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">ネットワーク機器のログを集めたい。手元にあるのは Windows Server。「Windows の標準機能で syslog を受けられないか？」—— 検索で辿り着く定番の疑問です。本稿では先に結論を述べ、そのうえで Windows 環境での<em>現実的な選択肢</em>を比較します。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#ketsuron">結論 — 標準機能だけでは受信できない</a></li>
+        <li><a href="#naze">なぜ勘違いしやすいのか — イベントログと WEF</a></li>
+        <li><a href="#sentakushi">現実的な選択肢は四つ</a></li>
+        <li><a href="#native">Windows ネイティブの OSS という答え</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="ketsuron">結論 — 標準機能だけでは受信できない</h2>
+      <p>結論から言うと、<strong>Windows には syslog を受信する標準機能（syslog デーモンに相当するもの）は搭載されていません</strong>。ポート 514 で待ち受けてログを保存する仕組みは、OS には入っていないのです。機器の syslog 送信先に Windows サーバの IP を設定しても、届いたパケットは誰にも受け取られずに捨てられます。</p>
+      <p>syslog は UNIX 生まれのプロトコルで、Linux には rsyslog などの実装が最初から入っています。一方 Windows は、ログの世界を独自の「イベントログ」で組み立ててきたため、syslog の受け口を持たないまま今日に至っています。</p>
+
+      <h2 id="naze">なぜ勘違いしやすいのか — イベントログと WEF</h2>
+      <p>Windows にもログを集める仕組み自体はあります。それが混同のもとです。</p>
+      <ul>
+        <li><strong>イベントログ</strong> —— Windows 自身のログの器。ただし他機器からの syslog を受ける機能ではありません。</li>
+        <li><strong>Windows イベント転送（WEF）</strong> —— Windows マシン同士でイベントログを転送・収集する標準機能。集められるのは Windows のイベントだけで、ネットワーク機器の syslog は対象外です。</li>
+      </ul>
+      <p>つまり「Windows 同士でログを寄せる」道は標準にありますが、「機器の syslog を受ける」道は標準にはない、というのが正確な整理です。</p>
+
+      <h2 id="sentakushi">現実的な選択肢は四つ</h2>
+      <p>では Windows 中心の環境で syslog を受けるにはどうするか。選択肢は次の四つに集約されます。</p>
+      <div class="table-scroll">
+        <table>
+          <caption>Windows 環境で syslog を受ける方法</caption>
+          <thead>
+            <tr><th scope="col">方法</th><th scope="col">概要</th><th scope="col">注意点</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Linux サーバを併設</th><td>rsyslog／syslog-ng を載せた Linux（実機・VM）を立てる</td><td>Linux の構築・維持スキルが必要。閲覧画面は別途用意</td></tr>
+            <tr><th scope="row">商用の Windows 向け製品</th><td>Windows で動く商用 syslog サーバを購入</td><td>ライセンス費用が継続的に発生</td></tr>
+            <tr><th scope="row">簡易ビューア系ツール</th><td>受信して画面に流す軽量ツールを使う</td><td>保存・検索・保持管理が弱く、常用のログ基盤には不足しがち</td></tr>
+            <tr><th scope="row" class="ware">Windows ネイティブの OSS</th><td class="ware">Windows サービスとして動く OSS の syslog サーバを導入</td><td class="ware">費用なし・Linux 不要。Windows 管理者の技能だけで運用できる</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>各カテゴリの詳しい比較は <a href="../syslog-server-selection/">「syslog サーバの選び方」</a>にまとめています。</p>
+
+      <h2 id="native">Windows ネイティブの OSS という答え</h2>
+      <p>「標準機能にないなら、Windows の流儀のまま足せばいい」—— それが四つ目の道です。<a href="../../">Yagura（やぐら）</a>は Windows にそのまま置ける OSS（Apache License 2.0）の syslog 集約サーバで、MSI をひとつ実行すれば、サービス登録・ファイアウォール規則・内蔵データベースの用意まで済み、<code>udp/514</code>・<code>tcp/514</code> での受信が始まります。設定ファイルはなく、閲覧はブラウザ（<code>http://サーバ名:8514/</code>）から。標準機能に「なかったもの」を、標準機能と同じ手触りで補う道具です。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — ないものは、Windows の流儀で足す</h2>
+      <p>Windows 標準では受けられない。しかし Linux を持ち込む必要も、費用を掛ける必要もありません。導入の具体的な手順は <a href="../windows-syslog-server/">「Windows で無料の syslog サーバを構築する方法」</a>をどうぞ。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../windows-syslog-server/">構築手順の記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
+      <p><a href="../syslog-server-selection/">syslog サーバの選び方 — 商用製品・Linux 系 OSS・Windows ネイティブの比較</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

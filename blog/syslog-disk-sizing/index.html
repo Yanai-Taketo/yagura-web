@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式 | Yagura 読みもの</title>
+  <meta name="description" content="syslog サーバに必要なディスク容量の見積もり方を解説。EPS（毎秒メッセージ数）×平均サイズ×保持日数の計算式、規模別の試算例、データベースのオーバーヘッド、ログが急増する要因と対策（保持期間の自動削除）まで。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/syslog-disk-sizing/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式">
+  <meta property="og:description" content="EPS × 平均サイズ × 保持日数で見積もる、syslog サーバのディスク容量。規模別の試算例つき。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/syslog-disk-sizing/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式",
+  "description": "EPS × 平均サイズ × 保持日数で見積もる、syslog サーバのディスク容量。規模別の試算例つき。",
+  "url": "https://yagura.ta-yan.ai/blog/syslog-disk-sizing/",
+  "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/syslog-disk-sizing/",
+  "datePublished": "2026-07-26",
+  "dateModified": "2026-07-26",
+  "inLanguage": "ja",
+  "image": "https://yagura.ta-yan.ai/images/ogp.png",
+  "author": {
+    "@type": "Person",
+    "name": "YANAI Taketo",
+    "url": "https://github.com/Yanai-Taketo"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "YANAI Taketo"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Yagura",
+      "item": "https://yagura.ta-yan.ai/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "読みもの",
+      "item": "https://yagura.ta-yan.ai/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>ディスク容量の見積もり</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">設計</p>
+      <h1>syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">syslog サーバを立てる前に必ず聞かれるのが「ディスクはどれだけ要りますか」です。答えは環境次第 —— ですが、<em>見積もりの計算式</em>は一つに決まっています。本稿では計算式と規模別の試算例を示し、見積もりを狂わせる要因と、あふれさせないための設計までを解説します。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#shiki">見積もりの計算式</a></li>
+        <li><a href="#eps">EPS の当たりを付ける</a></li>
+        <li><a href="#shisan">規模別の試算例</a></li>
+        <li><a href="#overhead">データベースのオーバーヘッドを見込む</a></li>
+        <li><a href="#kyuzo">見積もりを狂わせる急増要因</a></li>
+        <li><a href="#afure">あふれさせない設計 — 保持期間の自動削除</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="shiki">見積もりの計算式</h2>
+      <p>必要容量は次の式で見積もります。</p>
+      <pre><code>必要容量 ≒ EPS × 平均メッセージサイズ × 86,400（秒/日） × 保持日数 × 余裕係数</code></pre>
+      <ul>
+        <li><strong>EPS</strong>（Events Per Second）—— 毎秒の受信メッセージ数の平均</li>
+        <li><strong>平均メッセージサイズ</strong> —— syslog は 1 件おおむね 100〜400 バイト程度。見積もりでは 300 バイト程度を置くと安全側です</li>
+        <li><strong>余裕係数</strong> —— データベースのオーバーヘッドと変動分。後述のとおり 2〜3 倍を見込みます</li>
+      </ul>
+
+      <h2 id="eps">EPS の当たりを付ける</h2>
+      <p>EPS は環境差が最も大きい変数です。目安として、通常レベル（Informational まで）の設定なら、スイッチや AP は平常時 1 台あたり毎分数件〜数十件程度に収まることが多く、ファイアウォールはトラフィックログを送るかどうかで桁が変わります。</p>
+      <p>机上で悩むより、<strong>数日間実際に受信して実測する</strong>のが確実です。受信側に統計画面があれば（<a href="../../">Yagura</a> ならダッシュボードとシステム状態画面）、日次の受信件数からそのまま EPS を割り出せます。</p>
+
+      <h2 id="shisan">規模別の試算例</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>試算例（平均 300 バイト・余裕係数 2 倍で計算）</caption>
+          <thead>
+            <tr><th scope="col">規模のイメージ</th><th scope="col">EPS</th><th scope="col">1 日あたり（生データ）</th><th scope="col">保持 30 日</th><th scope="col">保持 180 日</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">小規模（機器 10〜20 台）</th><td>2</td><td>約 52 MB</td><td>約 3 GB</td><td>約 19 GB</td></tr>
+            <tr><th scope="row">中規模（機器 50 台前後 + サーバ群）</th><td>10</td><td>約 259 MB</td><td>約 16 GB</td><td>約 93 GB</td></tr>
+            <tr><th scope="row">FW のトラフィックログも送る場合</th><td>100</td><td>約 2.6 GB</td><td>約 156 GB</td><td>約 933 GB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>見てのとおり、通常の機器ログだけなら容量は拍子抜けするほど小さく、今どきのサーバなら誤差の範囲です。桁が変わるのは、トラフィックログや <a href="../windows-eventlog-syslog/">Windows イベントログ</a>のような大量ソースを加えたときです。</p>
+
+      <h2 id="overhead">データベースのオーバーヘッドを見込む</h2>
+      <p>受信した生データをデータベースに保存すると、インデックスや管理領域の分だけ実消費は膨らみます。実効で生データの 2〜3 倍を見込んでおけば、まず不足しません。上の試算表はすでに 2 倍を織り込んだ値です。</p>
+      <p>また、保存先の選択も容量設計の一部です。Yagura は内蔵 SQLite で始めて、ログ量が育ったら管理画面のウィザードで SQL Server へ昇格できるため、「最初から大きな器を用意する」必要がありません。</p>
+
+      <h2 id="kyuzo">見積もりを狂わせる急増要因</h2>
+      <p>平均で見積もった容量は、次のような事態で一気に食い潰されることがあります。</p>
+      <ul>
+        <li><strong>Debug レベルでの送りっぱなし</strong> —— 調査のために下げたレベルの戻し忘れ（<a href="../network-device-syslog-config/">機器設定の記事</a>参照）</li>
+        <li><strong>障害時のログ嵐</strong> —— リンクのフラッピングや認証失敗のループで、特定機器が突然大量に送り始める</li>
+        <li><strong>集約対象の追加</strong> —— サーバ群やトラフィックログを後から加えて、前提の EPS が変わる</li>
+      </ul>
+      <p>対策は、送信元ホスト別の受信件数を日頃から眺められるようにしておくことです。急増はグラフを見れば一目で分かります。</p>
+
+      <h2 id="afure">あふれさせない設計 — 保持期間の自動削除</h2>
+      <p>最後の砦は保持期間の自動削除です。「気づいたらディスクが満杯でサーバごと停止」が、ログ基盤の最悪の障害だからです。保持日数を決め（考え方は <a href="../log-retention-period/">保存期間の記事</a>へ）、古いログが自動で消える仕組みを最初から有効にしておきます。Yagura は既定 30 日の自動削除が有効で、日数も実行時間帯も変更できます。さらに、保存先 DB の障害時にはディスクスプールへ退避して復旧後に取り込む仕組みもあり、「あふれ」と「消失」の両方に備えられます。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 式で当たりを付け、実測で確かめる</h2>
+      <p>計算式で桁を掴み、数日の実測で答え合わせをする。それで容量設計は十分です。まずは検証機で受信を始めて、実データを眺めるところから始めてください。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../log-retention-period/">保存期間の記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../log-retention-period/">ログの保存期間はどのくらい必要？ 目安と設計の考え方</a></p>
+      <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

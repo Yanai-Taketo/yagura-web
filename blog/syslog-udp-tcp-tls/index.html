@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？ | Yagura 読みもの</title>
+  <meta name="description" content="syslog の転送に UDP 514 と TCP 514 のどちらを使うべきか、違いと使い分けを解説。パケットロスの扱い、TCP の注意点、syslog over TLS（tcp/6514・RFC 5425）が必要になる場面まで、実務目線で整理します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/syslog-udp-tcp-tls/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？">
+  <meta property="og:description" content="UDP 514 と TCP 514 の違いと使い分け、syslog over TLS が要る場面を実務目線で整理。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/syslog-udp-tcp-tls/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？",
+  "description": "UDP 514 と TCP 514 の違いと使い分け、syslog over TLS が要る場面を実務目線で整理。",
+  "url": "https://yagura.ta-yan.ai/blog/syslog-udp-tcp-tls/",
+  "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/syslog-udp-tcp-tls/",
+  "datePublished": "2026-07-26",
+  "dateModified": "2026-07-26",
+  "inLanguage": "ja",
+  "image": "https://yagura.ta-yan.ai/images/ogp.png",
+  "author": {
+    "@type": "Person",
+    "name": "YANAI Taketo",
+    "url": "https://github.com/Yanai-Taketo"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "YANAI Taketo"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Yagura",
+      "item": "https://yagura.ta-yan.ai/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "読みもの",
+      "item": "https://yagura.ta-yan.ai/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>UDP・TCP・TLS の使い分け</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">基礎</p>
+      <h1>syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">機器の syslog 送信先を設定しようとすると、UDP と TCP が選べることに気づきます。どちらでも「動く」だけに、根拠を持って選びたいところです。本稿では両者の性質の違いと使い分けの指針、そして暗号化（syslog over TLS）が<em>必要になる場面・ならない場面</em>を整理します。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#udp">UDP 514 — 伝統と割り切り</a></li>
+        <li><a href="#tcp">TCP 514 — 到達性とその代償</a></li>
+        <li><a href="#tsukaiwake">使い分けの指針</a></li>
+        <li><a href="#tls">syslog over TLS（tcp/6514）は必要か</a></li>
+        <li><a href="#ukete">受け手側に求められること</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="udp">UDP 514 — 伝統と割り切り</h2>
+      <p>syslog の最も伝統的な運び方が UDP のポート 514 です。コネクションを張らず、送信元はメッセージを一方的に送り出すだけ。軽量で、送信側の実装も単純なため、ほぼすべての対応機器がまず UDP をサポートしています。</p>
+      <p>代償は<em>到達保証がない</em>ことです。経路の輻輳や受け手の取りこぼしでパケットが失われても、誰も気づきません。また、1 メッセージ 1 データグラムのため、長いメッセージは途中で切られることがあります。</p>
+
+      <h2 id="tcp">TCP 514 — 到達性とその代償</h2>
+      <p>TCP の 514 はコネクション型で、パケット単位の消失には再送で対処されるため、UDP より到達性が高くなります。長いメッセージも扱いやすく、監査目的でログの欠落を減らしたい場合に選ばれます。</p>
+      <p>ただし万能ではありません。受け手が落ちている間のログは送信元のバッファ次第で失われますし、受け手が詰まると送信側に影響が波及（バックプレッシャ）する可能性もあります。「TCP にすれば絶対に欠けない」わけではない、と弁えておくことが大切です。</p>
+
+      <h2 id="tsukaiwake">使い分けの指針</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>UDP と TCP の比較</caption>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">UDP 514</th><th scope="col">TCP 514</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">到達性</th><td>保証なし（輻輳時に欠落し得る）</td><td>再送により高い（ただし万能ではない）</td></tr>
+            <tr><th scope="row">機器の対応</th><td>ほぼ全機器</td><td>機器による</td></tr>
+            <tr><th scope="row">送信側の負荷</th><td>ごく軽い</td><td>コネクション維持の分だけ増える</td></tr>
+            <tr><th scope="row">向くログ</th><td>状態通知・一般の運用ログ</td><td>監査証跡など欠落を減らしたいログ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>実務の指針としては、<strong>まず UDP で全機器の受信を始め、監査・セキュリティ上重要な送信元だけ TCP 対応を確認して切り替える</strong>のが現実的です。完璧な方式を選ぶことより、受信を始めて実データで欠落の有無を観測するほうが、はるかに前進します。</p>
+
+      <h2 id="tls">syslog over TLS（tcp/6514）は必要か</h2>
+      <p>UDP も TCP も、514 のままでは<em>平文</em>です。経路上で盗み見・改竄され得ることは、方式を問わず変わりません。RFC 5425 の syslog over TLS（既定ポート <code>tcp/6514</code>）は、この経路を暗号化します。</p>
+      <p>必要になるのは、たとえば次のような場面です。</p>
+      <ul>
+        <li>ログが信頼度の異なるセグメントをまたいで流れる（拠点間、DMZ から内部へ、など）</li>
+        <li>ログに認証情報・個人情報などの機微な内容が含まれ得る</li>
+        <li>監査要件として経路暗号化が求められている</li>
+      </ul>
+      <p>逆に、管理された社内 LAN の同一セグメント内で完結するなら、まず平文で始めて差し支えありません。機器側の TLS 対応はまちまちなので、対応する送信元から段階的に 6514 へ寄せていく形になります。</p>
+
+      <h2 id="ukete">受け手側に求められること</h2>
+      <p>この使い分けを成立させるには、受け手の syslog サーバが UDP 514・TCP 514（IPv4/IPv6）を同時に受けられ、TLS 6514 も必要になったときに有効化できることが条件です。Windows ネイティブの OSS <a href="../../">Yagura（やぐら）</a>は、UDP/TCP 514 を既定で受け、syslog over TLS は opt-in で重ねられます。既定を軽く、強化を明示的に —— 本稿の指針をそのまま実装した形です。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 方式選びより、まず受信を</h2>
+      <p>UDP で始めて、重要な経路から TCP・TLS へ。順番さえ間違えなければ、方式選びで立ち止まる必要はありません。受け手側の構築は <a href="../windows-syslog-server/">「Windows で無料の syslog サーバを構築する方法」</a>で解説しています。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../windows-syslog-server/">構築手順の記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../syslog-server-basics/">syslog サーバとは？ 仕組み・ポート・RFC を基礎から解説</a></p>
+      <p><a href="../network-device-syslog-config/">ネットワーク機器の syslog 送信設定まとめ — FW・スイッチ・AP・UPS</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

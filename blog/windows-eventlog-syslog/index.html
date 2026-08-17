@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用） | Yagura 読みもの</title>
+  <meta name="description" content="Windows イベントログを syslog サーバに転送し、ネットワーク機器のログと一元管理する方法を解説。Fluent Bit による転送の仕組みと、Yagura のフォワーダキット生成機能を使った省力構築、サイレント導入までを紹介します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/windows-eventlog-syslog/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）">
+  <meta property="og:description" content="イベントログと機器の syslog を同じ画面で横断検索する。Fluent Bit とフォワーダキットによる集約手順。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/windows-eventlog-syslog/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）",
+    "description": "Windows イベントログを syslog サーバに転送して一元管理する方法。Fluent Bit の仕組みと Yagura のフォワーダキットによる省力構築を解説。",
+    "url": "https://yagura.ta-yan.ai/blog/windows-eventlog-syslog/",
+    "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/windows-eventlog-syslog/",
+    "datePublished": "2026-07-26",
+    "dateModified": "2026-07-26",
+    "inLanguage": "ja",
+    "image": "https://yagura.ta-yan.ai/images/ogp.png",
+    "author": { "@type": "Person", "name": "YANAI Taketo", "url": "https://github.com/Yanai-Taketo" },
+    "publisher": { "@type": "Person", "name": "YANAI Taketo" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Yagura", "item": "https://yagura.ta-yan.ai/" },
+      { "@type": "ListItem", "position": 2, "name": "読みもの", "item": "https://yagura.ta-yan.ai/blog/" },
+      { "@type": "ListItem", "position": 3, "name": "Windows イベントログを syslog サーバへ集約する方法" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>イベントログの集約</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">集約</p>
+      <h1>Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">ネットワーク機器のログは syslog サーバに集めた。しかし Windows サーバのログだけは、各サーバのイベントビューアーを開いて回っている —— そんな「集約の片手落ち」は珍しくありません。本稿では、Windows イベントログを syslog サーバへ転送し、機器のログと<em>同じ画面で横断検索する</em>方法を解説します。鍵になるのは、軽量な転送エージェント Fluent Bit です。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#naze">なぜイベントログも集約するのか</a></li>
+        <li><a href="#hoho">イベントログを外へ出す方法の比較</a></li>
+        <li><a href="#fluentbit">Fluent Bit とは — 軽量な転送エージェント</a></li>
+        <li><a href="#kit">Yagura のフォワーダキットで省力化する</a></li>
+        <li><a href="#tenkai">複数サーバへの展開とサイレント導入</a></li>
+        <li><a href="#kansi">転送が止まっていないかを見張る</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="naze">なぜイベントログも集約するのか</h2>
+      <p>Windows イベントログは各サーバのローカルに蓄積され、既定では容量上限に達すると古いものから上書きされていきます。集約しないままでは、次のような場面で困ります。</p>
+      <ul>
+        <li><strong>障害の相関が見えない</strong> —— スイッチの syslog と、その先のサーバのイベントログを別々の画面で突き合わせるのは骨が折れます。同じ時系列に並んでいれば一目で分かる相関も、分かれていると見落とします。</li>
+        <li><strong>サーバが落ちるとログも読めない</strong> —— まさに調査したいその瞬間、対象サーバのイベントビューアーは開けません。</li>
+        <li><strong>証跡の保全ができない</strong> —— ログオン失敗や設定変更の記録がローカルにしかない状態は、監査の観点でも心もとないものです。</li>
+      </ul>
+      <p>ネットワーク機器の syslog と Windows のイベントログが一つの検索窓に集まって、はじめて「ログを集めた」と言えます。なお、イベントログは機器の syslog より量が多くなりがちです。加える前に<a href="../syslog-disk-sizing/">ディスク容量の見積もり</a>で桁を確認しておくと安心です。</p>
+
+      <h2 id="hoho">イベントログを外へ出す方法の比較</h2>
+      <p>Windows イベントログを外部へ集める代表的な方法は三つあります。</p>
+      <div class="table-scroll">
+        <table>
+          <caption>イベントログ集約の主な方式</caption>
+          <thead>
+            <tr><th scope="col">方式</th><th scope="col">概要</th><th scope="col">特徴</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Windows イベント転送（WEF）</th>
+              <td>Windows 標準機能で、コレクタとなる Windows サーバへイベントを転送する</td>
+              <td>追加ソフト不要だが、集約先もイベントログ形式のまま。syslog と同じ画面には並ばない</td>
+            </tr>
+            <tr>
+              <th scope="row">エージェント型 SIEM／ログ基盤</th>
+              <td>各サーバに専用エージェントを入れて中央基盤へ送る</td>
+              <td>高機能だが、基盤自体の構築・運用・費用の負担が大きい</td>
+            </tr>
+            <tr>
+              <th scope="row" class="ware">転送エージェント + syslog サーバ</th>
+              <td class="ware">Fluent Bit などの軽量エージェントでイベントログを読み取り、syslog として送る</td>
+              <td class="ware">既存の syslog サーバに相乗りでき、機器のログと同じ画面で検索できる。本稿の方式</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="fluentbit">Fluent Bit とは — 軽量な転送エージェント</h2>
+      <p>Fluent Bit は、Apache License 2.0 で公開されている軽量のログ転送エージェントです。Windows 版はイベントログを読み取る入力プラグイン（winevtlog）を備えており、指定したチャンネル（System、Application、Security など）のイベントを取り出して、syslog 形式で外部へ送出できます。</p>
+      <p>仕組みとしては、各 Windows サーバに Fluent Bit を常駐させ、「どのチャンネルを読むか」「どこへ syslog で送るか」を設定ファイルに書く —— それだけです。ただし、実際に手を動かすと、設定ファイルの記法、サービス化、送信先ごとの調整と、台数分の細かな作業が積み上がります。</p>
+
+      <h2 id="kit">Yagura のフォワーダキットで省力化する</h2>
+      <p>Windows ネイティブの OSS syslog 集約サーバ <a href="../../">Yagura（やぐら）</a>は、この作業を織り込み済みです。Fluent Bit（Apache-2.0）の配布キットを同梱しており、管理画面の「フォワーダキット生成」から、<em>自機（Yagura サーバ）宛の設定が済んだキット（ZIP）</em>を生成できます。</p>
+      <p>流れは次のとおりです。</p>
+      <ul>
+        <li>Yagura の管理画面でフォワーダキット（ZIP）を生成する —— 送信先はその Yagura 自身に設定済み</li>
+        <li>ZIP を対象の Windows サーバへ持って行き、展開・導入する</li>
+        <li>イベントログが syslog として Yagura に届きはじめ、ダッシュボードと検索画面に、機器のログと並んで現れる</li>
+      </ul>
+      <p>設定ファイルの記法を調べ、送信先アドレスを一台ずつ書き込む作業は要りません。</p>
+
+      <h2 id="tenkai">複数サーバへの展開とサイレント導入</h2>
+      <p>フォワーダキットはサイレント導入に対応しているため、対象サーバが多い場合も、配布の仕組み（スクリプト配布や資産管理ツールなど）に乗せて一括展開できます。数十台のサーバに一台ずつ RDP で入って回る必要はありません。</p>
+      <p>展開後は、Yagura のダッシュボードで送信元ホスト別の受信状況を見れば、どのサーバから届いていて、どのサーバが未導入かが一覧できます。</p>
+
+      <h2 id="kansi">転送が止まっていないかを見張る</h2>
+      <p>集約で見落とされがちなのが、<em>転送そのものの死活</em>です。エージェントが停止しても、ログが「来なくなる」だけで、エラーはどこにも表示されません。</p>
+      <p>Yagura には送信元の途絶検知（opt-in）があり、ウォッチリストに登録した送信元からの受信が閾値時間（既定 24 時間）途絶えると警告されます。メール通知（opt-in）に乗せれば、「いつの間にか一か月分のイベントログが欠けていた」という事故を防げます。重要なサーバは、転送を始めた時点でウォッチリストに入れておくのがおすすめです。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 機器のログと同じ検索窓に</h2>
+      <p>イベントログの集約は、専用の大掛かりな基盤がなくても、軽量エージェントと syslog サーバの組み合わせで実現できます。Yagura なら、syslog サーバの構築（<a href="../windows-syslog-server/">手順はこちら</a>）からフォワーダキットの生成まで、Windows の流儀のままで完結します。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../windows-syslog-server/">構築手順の記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
+      <p><a href="../syslog-server-basics/">syslog サーバとは？ 仕組み・ポート・RFC を基礎から解説</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

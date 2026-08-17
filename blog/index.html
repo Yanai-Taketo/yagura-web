@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>読みもの（ブログ） — syslog サーバの基礎と Windows での実践 | Yagura</title>
+  <meta name="description" content="Windows ネイティブの OSS syslog 集約サーバ「Yagura」の読みもの。syslog サーバの仕組みの基礎から、Windows での無料構築手順、イベントログの集約、製品の選び方までを解説します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="読みもの（ブログ） — syslog サーバの基礎と Windows での実践 | Yagura">
+  <meta property="og:description" content="syslog サーバの仕組みの基礎から、Windows での無料構築手順、イベントログの集約、製品の選び方までを解説。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../images/favicon-180.png">
+  <link rel="stylesheet" href="../css/blog.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Yagura 読みもの",
+    "url": "https://yagura.ta-yan.ai/blog/",
+    "description": "Windows ネイティブの OSS syslog 集約サーバ「Yagura」の公式ブログ。syslog とログ集約の基礎、Windows での実践を解説。",
+    "inLanguage": "ja",
+    "publisher": { "@type": "Person", "name": "YANAI Taketo" }
+  }
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#mokuroku">記事一覧へ移動</a>
+<a class="daisen" href="../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../">Yagura</a>
+    <span class="obi-yomi">読みもの</span>
+    <a class="obi-dl" href="../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../">Yagura</a></li>
+      <li>読みもの</li>
+    </ol>
+  </nav>
+
+  <header class="hyoushi">
+    <h1>読みもの <span class="shu">—</span> syslog とログ集約の帖</h1>
+    <p class="fu">Windows ネイティブの OSS syslog 集約サーバ「Yagura（やぐら）」の版元がしるす、syslog サーバの基礎と Windows での実践の読みもの。仕組みの理解から、構築、集約、選定まで。</p>
+  </header>
+
+  <ul class="mokuroku" id="mokuroku">
+    <li>
+      <a href="syslog-server-basics/">
+        <span class="kan" aria-hidden="true">基礎</span>
+        <span class="dai">syslog サーバとは？ 仕組み・ポート・RFC を基礎から解説</span>
+        <span class="yousi">ネットワーク機器やサーバのログを一か所に集める syslog の仕組みを、プロトコルの成り立ち、UDP/TCP 514 と TLS 6514 の使い分け、RFC 3164 と RFC 5424 の違いまで、初めての方向けに整理します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="syslog-udp-tcp-tls/">
+        <span class="kan" aria-hidden="true">基礎</span>
+        <span class="dai">syslog は UDP と TCP のどちらを使うべき？ TLS（6514）は必要？</span>
+        <span class="yousi">どちらでも「動く」だけに迷いやすい転送方式の選択。UDP と TCP の性質の違い、使い分けの指針、そして syslog over TLS が必要になる場面・ならない場面を実務目線で整理します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="windows-standard-syslog/">
+        <span class="kan" aria-hidden="true">疑問</span>
+        <span class="dai">Windows 標準機能で syslog は受信できる？ — 答えと現実的な選択肢</span>
+        <span class="yousi">検索で辿り着く定番の疑問に、まず結論から。イベントログや Windows イベント転送（WEF）との違いを整理し、Windows 環境で syslog を受けるための現実的な四つの道を比較します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="windows-syslog-server/">
+        <span class="kan" aria-hidden="true">構築</span>
+        <span class="dai">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</span>
+        <span class="yousi">Linux を用意せず、ライセンス費用も掛けずに、Windows Server 上へ syslog サーバを立てる手順。MSI の実行から機器の送信先設定、ブラウザでの閲覧まで、Yagura を使った最短の道筋を示します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="network-device-syslog-config/">
+        <span class="kan" aria-hidden="true">設定</span>
+        <span class="dai">ネットワーク機器の syslog 送信設定まとめ — FW・スイッチ・AP・UPS</span>
+        <span class="yousi">機種ごとに画面は違っても、設定する内容は三要素に集約されます。CLI 機器と GUI 機器それぞれの勘所、debug レベルの落とし穴、NTP の重要性、設定後の確認方法までをまとめます。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="windows-eventlog-syslog/">
+        <span class="kan" aria-hidden="true">集約</span>
+        <span class="dai">Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）</span>
+        <span class="yousi">ネットワーク機器の syslog と Windows サーバのイベントログを、同じ画面で横断検索する。Fluent Bit を使った転送の考え方と、Yagura のフォワーダキットによる省力化の手順を解説します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="syslog-troubleshooting/">
+        <span class="kan" aria-hidden="true">保守</span>
+        <span class="dai">syslog が届かない・受信できないときの確認手順【チェックリスト】</span>
+        <span class="yousi">UDP の syslog は失敗してもエラーを返しません。送信側 → 経路 → 受信側 → 形式の順に潰していく切り分け手順を、チェックリスト形式でまとめます。514 番の競合や解析失敗の見つけ方も。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="syslog-disk-sizing/">
+        <span class="kan" aria-hidden="true">設計</span>
+        <span class="dai">syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式</span>
+        <span class="yousi">EPS × 平均サイズ × 保持日数 —— 見積もりの式は一つに決まっています。規模別の試算例、データベースのオーバーヘッド、ログが急増する要因と、あふれさせないための設計までを解説します。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="log-retention-period/">
+        <span class="kan" aria-hidden="true">運用</span>
+        <span class="dai">ログの保存期間はどのくらい必要？ 目安と設計の考え方</span>
+        <span class="yousi">一律の法定保存期間はあるのか。PCI DSS など参考になる基準と目的別の目安を整理し、決めた期間を人手に頼らず守るための、保持期間の自動削除による設計までをまとめます。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+    <li>
+      <a href="syslog-server-selection/">
+        <span class="kan" aria-hidden="true">選定</span>
+        <span class="dai">syslog サーバの選び方 — 商用製品・Linux 系 OSS・Windows ネイティブの比較</span>
+        <span class="yousi">商用の syslog 製品、rsyslog や syslog-ng などの Linux 系 OSS、そして Windows ネイティブという三つの道を、導入コスト・必要スキル・運用負荷の観点で比べ、規模と体制に合う選び方を考えます。</span>
+        <span class="hidzuke">2026年7月26日</span>
+      </a>
+    </li>
+  </ul>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../">紹介の巻（トップ）</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../#haifu">ダウンロード</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

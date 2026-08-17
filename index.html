@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yagura（やぐら） — Windows にそのまま置ける OSS の syslog 集約サーバ</title>
+  <meta name="description" content="Yagura（やぐら）は Windows ネイティブの OSS syslog 集約サーバ。MSI を入れて機器の syslog を向けるだけ。設定ファイル不要・追加 DB 不要・Linux 不要・ライセンス費用なし。内蔵 SQLite に即保存し、後から SQL Server へ昇格できます。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Yagura（やぐら） — Windows にそのまま置ける OSS の syslog 集約サーバ">
+  <meta property="og:description" content="MSI を入れて syslog を向けるだけ。設定ファイル不要・Linux 不要・ライセンス費用なし。ネットワークの、物見やぐら。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="images/favicon-180.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#haifu">ダウンロードへ移動</a>
+
+<!-- 題箋（固定・右上） -->
+<div class="daisen" aria-hidden="true">Yagura</div>
+
+<!-- 栞（固定・巻の目次。読む向きに合わせ右から左へ並ぶ） -->
+<nav class="shiori" aria-label="巻の目次">
+  <a href="#kanto"><span>巻頭</span></a>
+  <a href="#kuhaku"><span>空白地帯</span></a>
+  <a href="#sandan"><span>導入三段</span></a>
+  <a href="#jikken"><span>画面</span></a>
+  <a href="#midokoro"><span>見どころ</span></a>
+  <a href="#shikumi"><span>仕組み</span></a>
+  <a href="#kokoroe"><span>心得</span></a>
+  <a href="#haifu" class="shiori-dl"><span>配布</span></a>
+  <a href="#okuzuke"><span>奥付</span></a>
+</nav>
+
+<!-- 携帯用の帯（狭い画面のみ表示） -->
+<header class="obi">
+  <span class="obi-logo">Yagura</span>
+  <a class="obi-dl" href="#haifu">ダウンロード</a>
+</header>
+
+<!-- 繰り方の手引き（固定・左下） -->
+<p class="tebiki" id="tebiki" aria-hidden="true">← 左へ繰る（ホイールでも進めます）</p>
+
+<!-- 進み具合（固定・下端） -->
+<div class="susumi" aria-hidden="true"><i id="susumi-bar"></i></div>
+
+<main class="emaki" id="emaki" tabindex="0" aria-label="絵巻式の紙面（右から左へ読み進めます）">
+  <div class="maki" id="maki">
+
+    <!-- 八双 — 巻頭の端木（右端） -->
+    <div class="hassou" aria-hidden="true"></div>
+
+    <!-- ==================== 巻頭 ==================== -->
+    <section class="scene scene-kanto" id="kanto">
+      <div class="kanto-catch">
+        <h1 class="vtext">ネットワークの、<br>物見やぐら。</h1>
+        <p class="kanto-yomi vtext" aria-hidden="true">Windows に、据ゑる。</p>
+      </div>
+      <div class="kanto-lead">
+        <p class="lead">Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<br>
+        MSI を据ゑれば、設定なしでログは集まりはじめる。</p>
+        <ul class="tanzaku" aria-label="三つの約束">
+          <li><span class="vtext">設定ファイル、不要</span></li>
+          <li><span class="vtext">Linux、不要</span></li>
+          <li><span class="vtext">ライセンス費用、なし</span></li>
+        </ul>
+        <div class="kanto-cta">
+          <a class="btn btn-shu" href="#haifu">配布の段へ</a>
+          <a class="btn" href="https://github.com/Yanai-Taketo/Yagura">GitHub で読む</a>
+        </div>
+        <p class="kanto-port">udp/514 · tcp/514 を受け、<span class="nowrap">http://サーバ名:8514/</span> で見る</p>
+      </div>
+      <figure class="kanto-tower" aria-hidden="true">
+        <svg viewBox="0 0 260 340" width="240" height="314" fill="none" role="img">
+          <g class="tower-line" stroke-width="4.5" stroke-linecap="round">
+            <path d="M58 332 L100 92"/><path d="M202 332 L160 92"/>
+            <path d="M66 288 L194 288"/><path d="M76 232 L184 232"/><path d="M86 176 L174 176"/><path d="M95 124 L165 124"/>
+            <path d="M66 288 L184 232"/><path d="M194 288 L76 232"/>
+            <path d="M76 232 L174 176"/><path d="M184 232 L86 176"/>
+            <path d="M88 88 L172 88"/>
+            <path d="M100 88 L100 62"/><path d="M123 88 L123 62"/><path d="M146 88 L146 62"/><path d="M166 88 L166 62"/>
+            <path d="M92 62 L168 62"/>
+            <path d="M82 56 L130 24 L178 56"/>
+          </g>
+          <rect class="tower-hi" x="124" y="70" width="12" height="14"/>
+          <g class="tower-sign" stroke-width="2.5" stroke-dasharray="1 10" stroke-linecap="round">
+            <path d="M4 330 Q80 280 112 150"/>
+            <path d="M30 340 Q120 300 126 160"/>
+            <path d="M256 326 Q190 276 148 152"/>
+          </g>
+          <g class="tower-sign-dot">
+            <circle cx="112" cy="147" r="4"/><circle cx="126" cy="157" r="4"/><circle cx="148" cy="149" r="4"/>
+          </g>
+        </svg>
+      </figure>
+    </section>
+
+    <!-- ==================== 序・空白地帯 ==================== -->
+    <section class="scene" id="kuhaku">
+      <header class="sec-head">
+        <h2 class="vtext">空白地帯を、埋める</h2>
+        <span class="rakkan" aria-hidden="true">序</span>
+      </header>
+      <div class="sec-body sec-body-wide">
+        <p>Windows の現場で syslog を集めようとすると、道は二つしかなかった。商用製品は<em>ライセンス費用</em>が壁になり、Linux ベースの OSS は <em>Linux サーバの構築・運用スキル</em>が壁になる。Yagura は、その間の空白を埋める。</p>
+        <div class="table-scroll">
+          <table class="kurabe">
+            <caption>立ち位置くらべ</caption>
+            <thead>
+              <tr><th scope="col"></th><th scope="col">商用の syslog 製品</th><th scope="col">Linux ベースの OSS</th><th scope="col" class="ware">Yagura</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">導入コスト</th>
+                <td>ライセンス費用が発生</td>
+                <td>費用は掛からないが、Linux サーバの構築・運用が前提</td>
+                <td class="ware">ライセンス費用なし。Windows サービスとして導入</td>
+              </tr>
+              <tr>
+                <th scope="row">前提となるスキル</th>
+                <td>製品固有の操作の習得</td>
+                <td>Linux サーバの構築・運用スキル</td>
+                <td class="ware">Windows 管理者が既に持つスキル</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="soe">運用に要るのは、Windows サービス・SQL Server・Active Directory —— あなたが既に持っている技能だけ。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 導入三段・一 ==================== -->
+    <section class="scene scene-dan" id="sandan">
+      <span class="dan-num" aria-hidden="true">一</span>
+      <header class="sec-head">
+        <h2 class="vtext">据ゑる</h2>
+      </header>
+      <div class="sec-body">
+        <p>MSI をひとつ実行する。Windows サービスの登録も、ファイアウォール規則の作成も、内蔵データベースの用意も、すべて向こうで済む。</p>
+        <p>self-contained で配っているから、.NET ランタイムの事前導入すら要らない。設定ファイルは —— ない。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 導入三段・二 ==================== -->
+    <section class="scene scene-dan" id="dan2">
+      <span class="dan-num" aria-hidden="true">二</span>
+      <header class="sec-head">
+        <h2 class="vtext">向ける</h2>
+      </header>
+      <div class="sec-body">
+        <p>機器とサーバの syslog 送信先を、このサーバの <code>udp/514</code>・<code>tcp/514</code> へ向ける（IPv4/IPv6）。RFC 3164 も RFC 5424 も解釈する。</p>
+        <p>読めないログも、捨てない。原文のまま「解析失敗」の印を付けて保存する。syslog over TLS（<code>tcp/6514</code>）は、望むときだけ有効化。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 導入三段・三 ==================== -->
+    <section class="scene scene-dan" id="dan3">
+      <span class="dan-num" aria-hidden="true">三</span>
+      <header class="sec-head">
+        <h2 class="vtext">見る</h2>
+      </header>
+      <div class="sec-body">
+        <p>ブラウザで <code>http://サーバ名:8514/</code> を開く。もうログは集まっている。</p>
+        <p>ダッシュボードで眺め、検索で絞り、システム状態で受信の健康を確かめる。表示はライト・ダーク・OS 追従。時刻はサーバ OS のタイムゾーンで、オフセットを明示して示す。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 実見・画面 ==================== -->
+    <section class="scene scene-wide" id="jikken">
+      <header class="sec-head">
+        <h2 class="vtext">実見</h2>
+        <span class="rakkan" aria-hidden="true">画面</span>
+      </header>
+      <div class="jikken-grid">
+        <figure class="harikomi harikomi-main">
+          <button class="harikomi-btn" type="button" title="押すと拡大">
+            <img src="images/dashboard-light.png" width="1280" height="800" alt="Yagura のダッシュボード画面。受信件数の推移グラフ、送信元ホスト別・重要度別の集計、最近のログ一覧が一望できる" loading="lazy">
+          </button>
+          <figcaption>ダッシュボード —— 受信の全景を一望する</figcaption>
+        </figure>
+        <div class="harikomi-fuku">
+          <figure class="harikomi">
+            <button class="harikomi-btn" type="button" title="押すと拡大">
+              <img src="images/search-light.png" width="1280" height="1500" alt="ログ検索画面。期間・ホスト・重要度・本文で絞り込める" loading="lazy">
+            </button>
+            <figcaption>ログ検索</figcaption>
+          </figure>
+          <figure class="harikomi">
+            <button class="harikomi-btn" type="button" title="押すと拡大">
+              <img src="images/status-light.png" width="1280" height="800" alt="システム状態画面。受信・保存の統計と取りこぼしカウンタを表示" loading="lazy">
+            </button>
+            <figcaption>システム状態</figcaption>
+          </figure>
+          <figure class="harikomi">
+            <button class="harikomi-btn" type="button" title="押すと拡大">
+              <img src="images/forwarder-kit-light.png" width="1280" height="800" alt="フォワーダキット生成画面。Windows イベントログ転送用の Fluent Bit 設定入り ZIP を生成する" loading="lazy">
+            </button>
+            <figcaption>フォワーダキット生成</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 見どころ・機能 ==================== -->
+    <section class="scene scene-wide" id="midokoro">
+      <header class="sec-head">
+        <h2 class="vtext">見どころ</h2>
+        <span class="rakkan" aria-hidden="true">機能</span>
+      </header>
+      <ul class="kinou">
+        <li><h3>ゼロ設定で受信・保存開始</h3><p>インストール直後から内蔵 SQLite に保存。DB の導入も設定ファイルの編集も要らない。</p></li>
+        <li><h3>syslog 受信</h3><p>UDP 514／TCP 514（平文・IPv4/IPv6）。RFC 3164／RFC 5424 を解析。syslog over TLS（TCP 6514・RFC 5425）は opt-in で有効化できる。</p></li>
+        <li><h3>ログを失わない設計</h3><p>解析に失敗したメッセージも破棄せず、生データのまま「解析失敗」の印を付けて保存。取りこぼしは発生箇所別カウンタで観測でき、CI でも検証している。</p></li>
+        <li><h3>SQL Server への本番昇格</h3><p>管理画面のウィザードで SQLite から SQL Server へ切替。パスワードは Windows DPAPI で暗号化して保存する。</p></li>
+        <li><h3>Windows イベントログの転送</h3><p>Fluent Bit（Apache-2.0）の配布キットを同梱。管理画面から自機宛の設定入りキット（ZIP）を生成でき、サイレント導入にも対応。</p></li>
+        <li><h3>Web UI（Blazor）</h3><p>ダッシュボード・ログ検索・システム状態の三画面。テーマはライト（既定）・ダーク・OS 追従。時刻はサーバ OS のタイムゾーンで表示（オフセット明示）。</p></li>
+        <li><h3>保持期間の自動削除</h3><p>既定 30 日。日数も実行時間帯も設定できる。</p></li>
+        <li><h3>能動通知のメール送信（opt-in）</h3><p>証明書の期限接近・スプール退避の開始・保存の恒久失敗など、対応を要する警告を SMTP で知らせる。再送抑制と流量上限を備え、既定は無効。</p></li>
+        <li><h3>送信元の途絶検知（opt-in）</h3><p>「来るはずの syslog が来ていない」に気づける。ウォッチリストに登録した送信元からの受信が閾値時間（既定 24 時間）途絶えると警告し、メール通知にも乗せられる。</p></li>
+        <li><h3>閲覧 UI のアクセス制御（opt-in）</h3><p>Windows 統合認証 + AD グループマッピングで、機微なログを読める人を「閲覧」「管理」の役割で絞れる。既定は現状どおり無認証。</p></li>
+        <li><h3>閲覧 UI の HTTPS（opt-in）</h3><p>閲覧画面を同じポートのまま HTTPS へ切り替えられる（平文の面は残らない）。証明書はストアの一覧から選び、サーバ名との不一致は保存前に検査。期限切れ時も平文へは落とさない。</p></li>
+        <li><h3>管理 UI のアクセス制御（opt-in）</h3><p>既定は loopback 限定・無認証。Windows 統合認証（AD/Kerberos）または独自 ID/パスワード認証を有効化でき、リモート公開時は HTTPS 必須（fail-closed）。</p></li>
+        <li><h3>ディスクスプール</h3><p>保存先 DB の障害時は受信データをディスクへ退避し、復旧後に取り込む。</p></li>
+        <li><h3>MSI インストーラ</h3><p>サービス登録からファイアウォール規則の作成まで自動。self-contained のため .NET ランタイムの事前導入も不要。</p></li>
+        <li><h3>物足りぬところは、要望を</h3><p>欲しい機能・困りごとは GitHub へ。<a href="https://github.com/Yanai-Taketo/Yagura/issues/new/choose">機能を要望する（Issues）</a>、または <a href="https://github.com/Yanai-Taketo/Yagura/discussions">Discussions で相談</a>。</p></li>
+      </ul>
+    </section>
+
+    <!-- ==================== 仕組み ==================== -->
+    <section class="scene scene-wide" id="shikumi">
+      <header class="sec-head">
+        <h2 class="vtext">仕組み</h2>
+        <span class="rakkan" aria-hidden="true">単一の<br>サービス</span>
+      </header>
+      <div class="sec-body sec-body-wide">
+        <p>受信・解析・保存・閲覧を、単一の Windows サービスに同居させている。絵巻と同じく、流れは右から左へ。</p>
+        <figure class="zukai">
+          <svg viewBox="0 0 980 430" role="img" aria-label="構成図。右の送信元から syslog が UDP/TCP 514 で Yagura に届き、受信・解析・永続化を経て SQLite または SQL Server に保存。障害時はディスクスプールへ退避。閲覧はブラウザからポート8514、管理はループバック限定のポート8515。">
+            <g class="z-line" stroke-width="1.5" fill="none">
+              <!-- 送信元（右） -->
+              <rect x="790" y="70" width="176" height="76"/>
+              <rect x="790" y="196" width="176" height="76"/>
+              <!-- やぐら本体（中央） -->
+              <rect x="336" y="46" width="380" height="300" stroke-width="2.5"/>
+              <rect x="600" y="100" width="88" height="48"/>
+              <rect x="482" y="100" width="88" height="48"/>
+              <rect x="364" y="100" width="88" height="48"/>
+              <rect x="392" y="252" width="300" height="52" stroke-dasharray="5 5"/>
+              <!-- 保存先（左下） -->
+              <rect x="150" y="196" width="150" height="56"/>
+              <rect x="150" y="290" width="150" height="56"/>
+              <!-- 閲覧（左上） -->
+              <rect x="20" y="70" width="150" height="76"/>
+              <!-- 矢印：送信元 → 受信 -->
+              <path d="M790 108 L716 118"/><path d="M726 111 L716 118 L727 122"/>
+              <path d="M790 234 L716 150"/><path d="M726 141 L716 150 L728 152"/>
+              <!-- 受信 → 解析 → 永続化 -->
+              <path d="M600 124 L570 124"/><path d="M579 119 L570 124 L579 129"/>
+              <path d="M482 124 L452 124"/><path d="M461 119 L452 124 L461 129"/>
+              <!-- 永続化 → 保存先 -->
+              <path d="M408 148 L300 218"/><path d="M310 211 L300 218 L312 220"/>
+              <!-- 永続化 ⇔ スプール -->
+              <path d="M420 148 L500 252" stroke-dasharray="5 5"/><path d="M492 244 L500 252 L497 241"/>
+              <!-- SQLite → SQL Server 昇格 -->
+              <path d="M225 252 L225 290"/><path d="M220 281 L225 290 L230 281"/>
+              <!-- やぐら → 閲覧 -->
+              <path d="M336 108 L170 108"/><path d="M179 103 L170 108 L179 113"/>
+            </g>
+            <g class="z-text">
+              <text x="878" y="100" text-anchor="middle">ネットワーク機器</text>
+              <text x="878" y="122" text-anchor="middle" class="z-small">FW・スイッチ・AP・UPS など</text>
+              <text x="878" y="226" text-anchor="middle">Windows サーバ</text>
+              <text x="878" y="248" text-anchor="middle" class="z-small">イベントログを Fluent Bit で転送</text>
+              <text x="753" y="92" text-anchor="middle" class="z-small z-mono">syslog udp/tcp 514</text>
+              <text x="753" y="196" text-anchor="middle" class="z-small z-mono">tls 6514（opt-in）</text>
+              <text x="526" y="80" text-anchor="middle" class="z-strong">Yagura —— 単一の Windows サービス</text>
+              <text x="644" y="128" text-anchor="middle">受信</text>
+              <text x="526" y="128" text-anchor="middle">解析</text>
+              <text x="408" y="128" text-anchor="middle">永続化</text>
+              <text x="542" y="283" text-anchor="middle" class="z-small">ディスクスプール（DB 障害時に退避・復旧後に取込）</text>
+              <text x="225" y="219" text-anchor="middle">SQLite（内蔵）</text>
+              <text x="225" y="240" text-anchor="middle" class="z-small">導入直後はこちら</text>
+              <text x="225" y="313" text-anchor="middle">SQL Server</text>
+              <text x="225" y="334" text-anchor="middle" class="z-small">ウィザードで昇格</text>
+              <text x="95" y="100" text-anchor="middle">ブラウザで閲覧</text>
+              <text x="95" y="122" text-anchor="middle" class="z-small z-mono">http://サーバ名:8514/</text>
+              <text x="253" y="99" text-anchor="middle" class="z-small z-mono">8514（読み取り）</text>
+            </g>
+          </svg>
+        </figure>
+        <dl class="minato">
+          <dt><code>udp/514 · tcp/514</code></dt><dd>syslog 受信（平文・既定で有効）</dd>
+          <dt><code>tcp/6514</code></dt><dd>syslog over TLS（既定無効・opt-in）</dd>
+          <dt><code>tcp/8514</code></dt><dd>閲覧 UI（読み取りのみ。HTTPS 化は opt-in・同一ポート）</dd>
+          <dt><code>tcp/8515</code></dt><dd>管理 UI（loopback 固定）</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ==================== 心得 ==================== -->
+    <section class="scene" id="kokoroe">
+      <header class="sec-head">
+        <h2 class="vtext">心得</h2>
+        <span class="rakkan" aria-hidden="true">定</span>
+      </header>
+      <div class="sec-body">
+        <div class="kousatsu">
+          <p class="kousatsu-dai">掟</p>
+          <ul>
+            <li>一、管理された社内ネットワーク（信頼できる網の内）での利用を前提とする事</li>
+            <li>一、既定の受信は平文（udp・tcp 514）である事を弁へる事</li>
+            <li>一、閲覧 UI は既定で LAN 内に無認証で開かれる（読み取りのみ）事</li>
+            <li>一、インターネットに露出する機、接続者を統制できぬ網には、置かぬ事</li>
+          </ul>
+        </div>
+        <p class="soe">TLS 受信・閲覧/管理 UI の認証（AD または独自 ID）・HTTPS（閲覧・管理とも）は、いずれも設定で重ねられる（opt-in 強化）。既定を軽く、強化を明示的に —— それがこの道具の流儀。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 道のり ==================== -->
+    <section class="scene" id="michinori" data-until-v1>
+      <header class="sec-head">
+        <h2 class="vtext">道のり</h2>
+        <span class="rakkan" aria-hidden="true">v1.0</span>
+      </header>
+      <div class="sec-body">
+        <p>v1.0（本番推奨版）は、期日ではなく<em>第三者が検証できる基準</em>で定める。基準は先に固定してあり、達しやすい形に動かすことはしない。</p>
+        <ol class="kijun">
+          <li>機能の完備</li>
+          <li>独立した二環境 × 連続三十日の実運用実績</li>
+          <li>利用者向け文書の完備</li>
+          <li>後方互換性の凍結</li>
+          <li>リリースの完全性（コード署名・checksum 等）</li>
+        </ol>
+        <p class="soe">五つすべてを満たしたとき、v1.0 を公開する。</p>
+      </div>
+    </section>
+
+    <!-- ==================== 配布 ==================== -->
+    <section class="scene" id="haifu">
+      <header class="sec-head">
+        <h2 class="vtext">配布</h2>
+        <span class="rakkan rakkan-shu" aria-hidden="true">頒</span>
+      </header>
+      <div class="sec-body">
+        <p class="dl-jou"><span class="dl-seal" id="release-version" hidden></span><span class="dl-date" id="release-date"></span></p>
+        <p class="dl-status" id="dl-status" aria-live="polite">最新版は GitHub の Releases を参照してください。</p>
+        <div class="dl-btns">
+          <a class="btn btn-shu btn-dl" id="dl-x64" href="https://github.com/Yanai-Taketo/Yagura/releases">x64 版をダウンロード<small id="dl-x64-size"></small></a>
+          <a class="btn btn-dl" id="dl-arm64" href="https://github.com/Yanai-Taketo/Yagura/releases">ARM64 版（試験的）<small id="dl-arm64-size"></small></a>
+        </div>
+        <p class="dl-sha">
+          <a id="dl-x64-sha" href="https://github.com/Yanai-Taketo/Yagura/releases" hidden>x64 の checksum（.sha256）</a>
+          <a id="dl-arm64-sha" href="https://github.com/Yanai-Taketo/Yagura/releases" hidden>ARM64 の checksum（.sha256）</a>
+        </p>
+        <p class="dl-notes"><a id="release-notes" href="https://github.com/Yanai-Taketo/Yagura/releases">リリースノートを見る（GitHub Releases）</a></p>
+      </div>
+    </section>
+
+    <!-- ==================== 奥付 ==================== -->
+    <footer class="scene scene-okuzuke" id="okuzuke">
+      <h2 class="vtext okuzuke-dai">奥付</h2>
+      <div class="okuzuke-cols">
+        <dl>
+          <dt>名</dt><dd>Yagura（やぐら）</dd>
+          <dt>素性</dt><dd>Windows ネイティブの OSS syslog 集約サーバ</dd>
+          <dt>免許</dt><dd><a href="https://github.com/Yanai-Taketo/Yagura/blob/main/LICENSE">Apache License 2.0</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura/blob/main/NOTICE">NOTICE</a></dd>
+          <dt>文書</dt><dd><a href="https://github.com/Yanai-Taketo/Yagura/tree/main/docs">日本語ドキュメント</a>（日本語ファースト）</dd>
+          <dt>読みもの</dt><dd><a href="blog/">ブログ — syslog とログ集約の帖</a></dd>
+          <dt>版元</dt><dd><a href="https://github.com/Yanai-Taketo/Yagura">github.com/Yanai-Taketo/Yagura</a></dd>
+          <dt>音信</dt><dd><a href="https://github.com/Yanai-Taketo/Yagura/issues">Issues</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura/discussions">Discussions</a></dd>
+        </dl>
+        <p class="okuzuke-cr">© YANAI Taketo</p>
+      </div>
+    </footer>
+
+    <!-- 軸 — 巻末の芯木（左端） -->
+    <div class="jiku" aria-hidden="true"></div>
+
+  </div>
+</main>
+
+<!-- 披見 — 貼り込みの拡大表示 -->
+<dialog class="hiken" id="hiken" aria-label="画面写真の拡大表示">
+  <button class="hiken-close" id="hiken-close" type="button" aria-label="閉じる">閉づ</button>
+  <figure>
+    <img id="hiken-img" alt="">
+    <figcaption id="hiken-cap"></figcaption>
+  </figure>
+</dialog>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

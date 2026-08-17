@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ログの保存期間はどのくらい必要？ 目安と設計の考え方 | Yagura 読みもの</title>
+  <meta name="description" content="syslog やサーバログの保存期間はどのくらい必要か。法令上の位置づけ、PCI DSS など参考になる基準、目的別（障害調査・セキュリティ調査・監査）の目安、保持期間の自動削除による設計方法までを解説します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/log-retention-period/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ログの保存期間はどのくらい必要？ 目安と設計の考え方">
+  <meta property="og:description" content="ログ保存期間の考え方を、参考基準と目的別の目安から整理。自動削除による設計方法まで。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/log-retention-period/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ログの保存期間はどのくらい必要？ 目安と設計の考え方",
+  "description": "ログ保存期間の考え方を、参考基準と目的別の目安から整理。自動削除による設計方法まで。",
+  "url": "https://yagura.ta-yan.ai/blog/log-retention-period/",
+  "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/log-retention-period/",
+  "datePublished": "2026-07-26",
+  "dateModified": "2026-07-26",
+  "inLanguage": "ja",
+  "image": "https://yagura.ta-yan.ai/images/ogp.png",
+  "author": {
+    "@type": "Person",
+    "name": "YANAI Taketo",
+    "url": "https://github.com/Yanai-Taketo"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "YANAI Taketo"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Yagura",
+      "item": "https://yagura.ta-yan.ai/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "読みもの",
+      "item": "https://yagura.ta-yan.ai/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "ログの保存期間はどのくらい必要？ 目安と設計の考え方"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>ログの保存期間</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">運用</p>
+      <h1>ログの保存期間はどのくらい必要？ 目安と設計の考え方</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">ログを集めはじめると、次に必ず問われるのが「いつまで残すか」です。長いほど安心に思えますが、容量と管理の負担は保存期間に比例して増えます。本稿では、保存期間を決めるための<em>拠りどころ</em>と目的別の目安を整理し、決めた期間を確実に守る設計までをまとめます。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#hourei">一律の「法定保存期間」はあるのか</a></li>
+        <li><a href="#kijun">参考になる基準 — PCI DSS など</a></li>
+        <li><a href="#mokuteki">目的別の目安</a></li>
+        <li><a href="#kettei">自社の期間を決める手順</a></li>
+        <li><a href="#sekkei">決めた期間を守る設計 — 自動削除</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="hourei">一律の「法定保存期間」はあるのか</h2>
+      <p>まず前提として、日本の一般的な企業のシステムログ（syslog・サーバログ）について、<strong>「何日保存せよ」と一律に定めた法令はありません</strong>。保存期間は基本的に、各組織が目的とリスクに照らして自分で決めるものです。</p>
+      <p>ただし、業種や扱う情報によっては、業法・契約・取引先の要求・認証制度（ISMS など）・社内の情報セキュリティ規程が保存期間を実質的に定めている場合があります。まず確認すべきは外部の相場ではなく、<em>自社にすでに課されている要求</em>です。</p>
+
+      <h2 id="kijun">参考になる基準 — PCI DSS など</h2>
+      <p>拠りどころが何もない場合に広く参照されるのが、クレジットカード業界のセキュリティ基準 PCI DSS です。監査ログについて<strong>少なくとも 1 年間保存し、直近 3 か月分は即時に参照できる状態にする</strong>ことを求めており、カード情報を扱わない組織でも「1 年・直近 3 か月即時」という水準は一つの目安として引用されます。</p>
+      <p>また、セキュリティインシデントの調査では、侵入から発覚までに数か月を要する事例が珍しくないことが各種の調査報告で指摘されています。「発覚してから遡りたい期間」を保存期間の下限に置く、という考え方はここから来ています。</p>
+
+      <h2 id="mokuteki">目的別の目安</h2>
+      <div class="table-scroll">
+        <table>
+          <caption>目的別の保存期間の目安</caption>
+          <thead>
+            <tr><th scope="col">主目的</th><th scope="col">目安</th><th scope="col">考え方</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">日常の障害調査</th><td>30〜90 日</td><td>「先月の障害と比べたい」に応えられる長さ。ネットワーク運用の実用線</td></tr>
+            <tr><th scope="row">セキュリティ調査</th><td>6 か月〜1 年</td><td>発覚の遅れに備えて遡れる長さを確保する</td></tr>
+            <tr><th scope="row">監査・証跡</th><td>1 年以上</td><td>PCI DSS 水準。監査サイクル（年次）を跨いで残す</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>すべてのログを最長に合わせる必要はありません。認証・操作系の証跡は長く、機器の状態通知は短く、と<em>ログの種類で期間を変える</em>のも合理的な設計です。</p>
+
+      <h2 id="kettei">自社の期間を決める手順</h2>
+      <ul>
+        <li><strong>一. 課されている要求を洗う</strong> —— 業法・契約・認証・社内規程。あればそれが下限になります</li>
+        <li><strong>二. 目的から目安を選ぶ</strong> —— 上の表から、主目的に合う水準を仮置きします</li>
+        <li><strong>三. 容量と突き合わせる</strong> —— <a href="../syslog-disk-sizing/">ディスク容量の見積もり</a>で試算し、無理があれば期間か対象を調整します</li>
+        <li><strong>四. 文書に残す</strong> —— 決めた期間と理由を一枚でよいので書き残します。監査で問われるのは日数そのものより「根拠を持って決めているか」です</li>
+      </ul>
+
+      <h2 id="sekkei">決めた期間を守る設計 — 自動削除</h2>
+      <p>期間を決めたら、それを<em>人手に頼らず守る</em>仕組みにします。手動削除の運用は、忘れればディスクを圧迫し、消しすぎれば証跡を失う、どちらにも転べる危うさがあります。</p>
+      <p>syslog サーバ側の保持期間設定（自動削除）を使うのが確実です。<a href="../../">Yagura（やぐら）</a>では既定で 30 日の自動削除が有効になっており、日数も削除を実行する時間帯も設定で変更できます。監査要件で 1 年に延ばす、検証環境では 7 日に縮める —— 決めた期間をそのまま設定に写せば、あとは仕組みが守ってくれます。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 期間は「決めて、書いて、仕組みに写す」</h2>
+      <p>要求を洗い、目的から選び、容量と突き合わせ、根拠ごと文書にして、自動削除の設定に写す。ここまでやれば、保存期間は運用の心配事ではなくなります。受け手の構築がまだなら <a href="../windows-syslog-server/">Windows での構築手順</a>からどうぞ。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../syslog-disk-sizing/">容量見積もりの記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../syslog-disk-sizing/">syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式</a></p>
+      <p><a href="../syslog-server-selection/">syslog サーバの選び方 — 商用製品・Linux 系 OSS・Windows ネイティブの比較</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

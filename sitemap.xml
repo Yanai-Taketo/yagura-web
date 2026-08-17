@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://yagura.ta-yan.ai/</loc><lastmod>2026-07-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/</loc><lastmod>2026-07-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/syslog-server-basics/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/syslog-udp-tcp-tls/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/windows-standard-syslog/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/windows-syslog-server/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/network-device-syslog-config/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/windows-eventlog-syslog/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/syslog-troubleshooting/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/syslog-disk-sizing/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/log-retention-period/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yagura.ta-yan.ai/blog/syslog-server-selection/</loc><lastmod>2026-07-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>

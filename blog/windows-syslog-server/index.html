@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】 | Yagura 読みもの</title>
+  <meta name="description" content="Windows Server 上に無料（OSS）の syslog サーバを構築する手順を解説。Linux 不要・ライセンス費用なし・設定ファイル不要の Yagura なら、MSI を実行して機器の syslog 送信先を向けるだけ。ブラウザでの閲覧、SQL Server への昇格まで紹介します。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/windows-syslog-server/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】">
+  <meta property="og:description" content="Linux 不要・費用なしで Windows に syslog サーバを立てる最短手順。MSI を入れて機器の送信先を向けるだけ。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/windows-syslog-server/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】",
+    "description": "Windows Server 上に無料（OSS）の syslog サーバを構築する手順。MSI の実行から機器の送信先設定、ブラウザでの閲覧、SQL Server への昇格まで。",
+    "url": "https://yagura.ta-yan.ai/blog/windows-syslog-server/",
+    "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/windows-syslog-server/",
+    "datePublished": "2026-07-26",
+    "dateModified": "2026-07-26",
+    "inLanguage": "ja",
+    "image": "https://yagura.ta-yan.ai/images/ogp.png",
+    "author": { "@type": "Person", "name": "YANAI Taketo", "url": "https://github.com/Yanai-Taketo" },
+    "publisher": { "@type": "Person", "name": "YANAI Taketo" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Yagura", "item": "https://yagura.ta-yan.ai/" },
+      { "@type": "ListItem", "position": 2, "name": "読みもの", "item": "https://yagura.ta-yan.ai/blog/" },
+      { "@type": "ListItem", "position": 3, "name": "Windows で無料の syslog サーバを構築する方法" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>Windows で無料の syslog サーバを構築</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">構築</p>
+      <h1>Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">「機器のログを集めたいが、そのためだけに Linux サーバを立てるのは荷が重い。商用製品のライセンス費用も稟議が通らない」—— Windows 中心の現場でよく聞く悩みです。本稿では、Windows ネイティブの OSS syslog 集約サーバ <strong>Yagura（やぐら）</strong>を使い、<em>Linux 不要・費用なし・設定ファイル不要</em>で syslog サーバを構築する手順を解説します。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#youken">前提と要件の整理</a></li>
+        <li><a href="#erabu">なぜ Windows ネイティブの OSS か</a></li>
+        <li><a href="#install">手順一 — MSI をひとつ実行する</a></li>
+        <li><a href="#mukeru">手順二 — 機器の syslog 送信先を向ける</a></li>
+        <li><a href="#miru">手順三 — ブラウザで見る</a></li>
+        <li><a href="#unyou">運用の初期設定 — 保持期間・通知・途絶検知</a></li>
+        <li><a href="#shoukaku">本格運用へ — SQL Server への昇格</a></li>
+        <li><a href="#security">セキュリティ上の心得</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="youken">前提と要件の整理</h2>
+      <p>本稿で構築するのは、社内の管理されたネットワークで、ファイアウォール・スイッチ・無線 AP・UPS・サーバなどの syslog を受信して保存し、ブラウザから検索できるログ集約サーバです。前提は次のとおりです。</p>
+      <ul>
+        <li>受け手となる Windows マシン（Windows Server、または常時稼働できる Windows PC）が一台あること</li>
+        <li>ログを送りたい機器が「syslog 送信先」を設定できること（多くのネットワーク機器は対応しています）</li>
+        <li>利用場所は社内 LAN の内側であること（syslog の既定は平文のため）</li>
+      </ul>
+      <p>Linux の知識、データベースの事前構築、追加のライセンス費用は必要ありません。</p>
+
+      <h2 id="erabu">なぜ Windows ネイティブの OSS か</h2>
+      <p>syslog サーバの選択肢は従来、商用製品（ライセンス費用が壁）か、rsyslog・syslog-ng といった Linux 系 OSS（Linux サーバの構築・運用スキルが壁）の二択でした。Windows 管理者にとってはどちらも一段の負担があります。</p>
+      <p>Yagura はこの間を埋める選択肢です。単一の Windows サービスとして動き、運用に要るのは Windows サービス・SQL Server・Active Directory といった、<em>Windows 管理者が既に持っている技能だけ</em>。ライセンスは Apache License 2.0 の OSS で、費用は掛かりません。選定の比較検討は <a href="../syslog-server-selection/">「syslog サーバの選び方」</a>で詳しく扱っています。</p>
+
+      <h2 id="install">手順一 — MSI をひとつ実行する</h2>
+      <p><a href="../../#haifu">公式サイトの配布の段</a>（または <a href="https://github.com/Yanai-Taketo/Yagura/releases">GitHub Releases</a>）から MSI インストーラをダウンロードし、実行します。これだけで次がすべて済みます。</p>
+      <ul>
+        <li>Windows サービスとしての登録（受信・解析・保存・閲覧を単一サービスに同居）</li>
+        <li>Windows ファイアウォール規則の作成</li>
+        <li>内蔵データベース（SQLite）の用意 —— インストール直後から保存が始められます</li>
+      </ul>
+      <p>self-contained 形式で配布されているため、.NET ランタイムの事前導入も不要です。そして設定ファイルは —— ありません。インストールが終わった時点で、syslog サーバは既に <code>udp/514</code>・<code>tcp/514</code> で待ち受けています。</p>
+
+      <h2 id="mukeru">手順二 — 機器の syslog 送信先を向ける</h2>
+      <p>次に、ログを送りたい機器側の設定です。各機器の管理画面で「syslog サーバ」「ログ転送」といった項目を開き、送信先として Yagura を入れたサーバの IP アドレス（またはホスト名）と、ポート <code>514</code>（UDP または TCP、IPv4/IPv6 とも可）を指定します。機器タイプ別の勘所は<a href="../network-device-syslog-config/">「ネットワーク機器の syslog 送信設定まとめ」</a>に、届かない場合の切り分けは<a href="../syslog-troubleshooting/">確認手順の記事</a>にまとめています。</p>
+      <p>形式は RFC 3164・RFC 5424 のどちらでも解釈されます。機器が規格から外れたログを送ってきても心配は要りません。解析に失敗したメッセージも破棄されず、原文のまま「解析失敗」の印付きで保存されます。<em>ログを失わない</em>ことが、集約サーバの第一の仕事だからです。</p>
+      <p>なお、Windows サーバのイベントログも同じ画面に集約できます。手順は別稿 <a href="../windows-eventlog-syslog/">「Windows イベントログを syslog サーバへ集約する方法」</a>にまとめました。</p>
+
+      <h2 id="miru">手順三 — ブラウザで見る</h2>
+      <p>受信が始まったら、ブラウザで次の URL を開きます。</p>
+      <pre><code>http://サーバ名:8514/</code></pre>
+      <p>もうログは集まっています。画面は三つです。</p>
+      <ul>
+        <li><strong>ダッシュボード</strong> —— 受信件数の推移、送信元ホスト別・重要度別の集計、最近のログを一望</li>
+        <li><strong>ログ検索</strong> —— 期間・ホスト・重要度・本文での絞り込み</li>
+        <li><strong>システム状態</strong> —— 受信・保存の統計と、取りこぼしの発生箇所別カウンタ</li>
+      </ul>
+      <p>表示テーマはライト・ダーク・OS 追従から選べ、時刻はサーバ OS のタイムゾーンでオフセット明示のうえ表示されます。「UTC か JST か分からないログ」を突き合わせる不毛な時間とは、ここでお別れです。</p>
+
+      <h2 id="unyou">運用の初期設定 — 保持期間・通知・途絶検知</h2>
+      <p>受信が回り始めたら、運用向けの設定を必要な分だけ重ねます（いずれも任意・opt-in です）。</p>
+      <h3>保持期間の自動削除</h3>
+      <p>既定では 30 日で自動削除されます。日数も実行時間帯も変更できるため、監査要件に合わせて延ばす、ディスクに合わせて縮める、といった調整が可能です（何日にすべきかの考え方は<a href="../log-retention-period/">「ログの保存期間はどのくらい必要？」</a>へ）。</p>
+      <h3>能動通知のメール送信</h3>
+      <p>証明書の期限接近、スプール退避の開始、保存の恒久失敗など、対応を要する警告を SMTP で受け取れます。再送抑制と流量上限を備え、既定は無効です。</p>
+      <h3>送信元の途絶検知</h3>
+      <p>意外に気づけないのが「来るはずの syslog が来ていない」ことです。ウォッチリストに登録した送信元からの受信が閾値時間（既定 24 時間）途絶えると警告され、メール通知にも乗せられます。機器の障害や設定の巻き戻りを早期に発見できます。</p>
+
+      <h2 id="shoukaku">本格運用へ — SQL Server への昇格</h2>
+      <p>まずは内蔵 SQLite で十分に運用できますが、ログ量が増えてきたら、管理画面のウィザードで保存先を SQL Server へ切り替えられます。接続パスワードは Windows DPAPI で暗号化して保存されます。</p>
+      <p>また、保存先データベースに障害が起きた場合も、受信データはディスクスプールへ退避され、復旧後に取り込まれます。「DB が落ちていた間のログが消えた」を避ける仕組みです。</p>
+
+      <h2 id="security">セキュリティ上の心得</h2>
+      <div class="kokoroe">
+        <p>掟</p>
+        <p>一、管理された社内ネットワークでの利用を前提とすること。一、既定の受信は平文（udp・tcp 514）であることを弁えること。一、閲覧 UI（<code>tcp/8514</code>・読み取りのみ）は既定で LAN 内に無認証で開かれること。一、インターネットに露出する機や、接続者を統制できない網には置かないこと。</p>
+      </div>
+      <p>そのうえで、必要に応じて強化を重ねられます。syslog over TLS 受信（<code>tcp/6514</code>）、閲覧 UI の Windows 統合認証 + AD グループによるアクセス制御、閲覧・管理 UI の HTTPS 化 —— いずれも opt-in で、既定を軽く、強化を明示的に、という流儀です。管理 UI（<code>tcp/8515</code>）は既定で loopback 限定です。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 昼休みのうちに、ログは集まりはじめる</h2>
+      <p>ここまでの手順は、実作業としては「MSI を実行し、機器の送信先を向け、ブラウザを開く」の三つだけです。syslog サーバの構築が半日仕事だった時代は終わりました。まずは検証機で試し、集まったログを眺めてみてください。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="https://github.com/Yanai-Taketo/Yagura">GitHub で読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../windows-eventlog-syslog/">Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）</a></p>
+      <p><a href="../syslog-server-basics/">syslog サーバとは？ 仕組み・ポート・RFC を基礎から解説</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>

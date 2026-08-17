@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>企業導入ガイド — OSS syslog 集約サーバ Yagura 導入検討資料</title>
+  <meta name="description" content="Windows ネイティブの OSS syslog 集約サーバ Yagura の企業導入向け解説。製品概要、システム構成と要件、セキュリティ設計、Apache License 2.0 の商用利用、導入プロセス、サポート体制、FAQ を情報システム部門向けにまとめた検討資料です。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/enterprise/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="企業導入ガイド — OSS syslog 集約サーバ Yagura 導入検討資料">
+  <meta property="og:description" content="製品概要・システム要件・セキュリティ設計・ライセンス・導入プロセス・FAQ。情報システム部門向けの導入検討資料。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/enterprise/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f1efe8">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#14171c">
+  <link rel="icon" href="../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../images/favicon-180.png">
+  <link rel="stylesheet" href="../css/enterprise.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "企業導入ガイド — OSS syslog 集約サーバ Yagura 導入検討資料",
+    "description": "Windows ネイティブの OSS syslog 集約サーバ Yagura の企業導入向け解説。製品概要、要件、セキュリティ、ライセンス、導入プロセス、FAQ。",
+    "url": "https://yagura.ta-yan.ai/enterprise/",
+    "inLanguage": "ja",
+    "dateModified": "2026-07-26",
+    "author": { "@type": "Person", "name": "YANAI Taketo", "url": "https://github.com/Yanai-Taketo" },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": "Yagura",
+      "applicationCategory": "ServerApplication",
+      "operatingSystem": "Windows",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "url": "https://yagura.ta-yan.ai/"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Yagura", "item": "https://yagura.ta-yan.ai/" },
+      { "@type": "ListItem", "position": 2, "name": "企業導入ガイド" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "商用環境（企業の業務システム）で無償のまま利用できますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "はい。Yagura は Apache License 2.0 で公開されており、商用・社内利用・改変を含め、ライセンス費用なしで利用できます。ライセンス条文および NOTICE の順守は必要です。" }
+      },
+      {
+        "@type": "Question",
+        "name": "インターネットに接続できない閉域環境でも導入できますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "MSI インストーラは self-contained 形式で、.NET ランタイムの事前導入や導入時のオンライン取得を前提としていないため、閉域網への持ち込み導入が可能です。" }
+      },
+      {
+        "@type": "Question",
+        "name": "既存の SQL Server をログ保存先として利用できますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "はい。導入直後は内蔵 SQLite に保存され、管理画面のウィザードで既存の SQL Server へ保存先を切り替えられます。接続パスワードは Windows DPAPI で暗号化して保存されます。" }
+      },
+      {
+        "@type": "Question",
+        "name": "ベンダーによる商用サポートは提供されていますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "現時点で有償の商用サポート契約は提供していません。問い合わせは GitHub の Issues および Discussions で受け付けるコミュニティベースの体制です。ソフトウェアは Apache License 2.0 に基づき無保証で提供されます。" }
+      },
+      {
+        "@type": "Question",
+        "name": "閲覧できる利用者を制限できますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "はい。既定では閲覧 UI は LAN 内に読み取り専用・無認証で公開されますが、Windows 統合認証と Active Directory グループのマッピングによるアクセス制御（閲覧・管理の役割分け）、および HTTPS 化を設定で有効化できます。" }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../">Yagura</a>
+    <span class="obi-tag">企業導入ガイド</span>
+    <nav class="obi-links" aria-label="関連ページ">
+      <a href="../blog/">読みもの</a>
+      <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a>
+      <a href="../#haifu">ダウンロード</a>
+    </nav>
+  </div>
+</header>
+
+<main class="sheet" id="honbun">
+
+  <header class="doc-head">
+    <p class="doc-kind">導入検討資料</p>
+    <h1>企業導入ガイド<br>OSS syslog 集約サーバ「Yagura」</h1>
+    <p class="sub">情報システム部門・導入検討者向け</p>
+    <div class="doc-meta">
+      <span>最終更新: 2026年7月26日</span>
+      <span>作成: YANAI Taketo（開発元）</span>
+      <span>本資料は印刷して社内検討資料としてご利用いただけます</span>
+    </div>
+  </header>
+
+  <section class="abstract">
+    <p class="t">要　旨</p>
+    <p>Yagura（やぐら）は、Windows Server 上で単一の Windows サービスとして動作する、オープンソース（Apache License 2.0）の syslog 集約サーバである。ネットワーク機器・サーバのログを一元的に受信・保存し、Web ブラウザから検索・可視化できる。ライセンス費用は不要で、Linux サーバの併設も要しない。本資料では、製品概要、システム構成と要件、セキュリティ設計、ライセンス上の取り扱い、導入プロセス、サポート体制を、導入判断に必要な範囲でまとめる。</p>
+  </section>
+
+  <nav class="toc" aria-label="目次">
+    <p>目　次</p>
+    <ol>
+      <li><a href="#haikei">導入の背景と課題</a></li>
+      <li><a href="#gaiyou">製品概要</a></li>
+      <li><a href="#kinou">主要機能</a></li>
+      <li><a href="#kousei">システム構成と要件</a></li>
+      <li><a href="#security">セキュリティ設計</a></li>
+      <li><a href="#hozen">信頼性とデータ保全</a></li>
+      <li><a href="#license">ライセンスとコスト</a></li>
+      <li><a href="#process">導入プロセスの推奨</a></li>
+      <li><a href="#release">リリース方針（v1.0 基準）</a></li>
+      <li><a href="#support">サポートと問い合わせ</a></li>
+      <li><a href="#faq">よくある質問（FAQ）</a></li>
+    </ol>
+  </nav>
+
+  <div class="doc">
+
+    <h2 id="haikei">導入の背景と課題</h2>
+    <p>ネットワーク機器（ファイアウォール、スイッチ、無線 AP、UPS 等）およびサーバのログを各機器内に留めたままにすると、次の課題が生じる。</p>
+    <ul>
+      <li><strong>障害対応の遅延</strong> — 機器ごとに管理画面を確認する必要があり、複数機器にまたがる事象の相関把握が困難</li>
+      <li><strong>ログの喪失</strong> — 機器内蔵ログは容量が小さく、再起動・上書きで消失する。機器障害時には当該機器のログ自体が参照不能となる</li>
+      <li><strong>証跡の不備</strong> — 設定変更・認証失敗等の記録が保全されず、監査・インシデント調査の基礎資料を欠く</li>
+    </ul>
+    <p>syslog による集約はこれらへの標準的な対策であるが、従来の選択肢は、ライセンス費用を要する商用製品か、Linux サーバの構築・運用スキルを前提とする Linux 系 OSS に限られていた。Windows 中心の運用体制を持つ組織にとって、いずれも導入障壁が存在する。Yagura は、この間隙を埋める Windows ネイティブの OSS として開発されている。選定観点の詳細な比較は<a href="../blog/syslog-server-selection/">別稿</a>を参照。</p>
+
+    <h2 id="gaiyou">製品概要</h2>
+    <div class="table-scroll">
+      <table>
+        <caption>表 1　製品基本情報</caption>
+        <tbody>
+          <tr><th scope="row">名称</th><td>Yagura（やぐら）</td></tr>
+          <tr><th scope="row">種別</th><td>syslog 集約サーバ（受信・解析・保存・閲覧を単一の Windows サービスに統合）</td></tr>
+          <tr><th scope="row">動作環境</th><td>Windows（x64、および試験的に ARM64）。対応 OS の詳細は <a href="https://github.com/Yanai-Taketo/Yagura/tree/main/docs">GitHub のドキュメント</a>を参照</td></tr>
+          <tr><th scope="row">ライセンス</th><td>Apache License 2.0（オープンソース。商用利用可・ライセンス費用不要）</td></tr>
+          <tr><th scope="row">配布形態</th><td>MSI インストーラ（self-contained。.NET ランタイムの事前導入不要）。<a href="https://github.com/Yanai-Taketo/Yagura/releases">GitHub Releases</a> にて checksum（.sha256）とともに配布</td></tr>
+          <tr><th scope="row">閲覧手段</th><td>Web ブラウザ（Blazor 製 UI。ダッシュボード・ログ検索・システム状態の三画面）</td></tr>
+          <tr><th scope="row">保存先</th><td>内蔵 SQLite（既定）／ SQL Server（管理画面のウィザードで切替可能）</td></tr>
+          <tr><th scope="row">文書</th><td><a href="https://github.com/Yanai-Taketo/Yagura/tree/main/docs">日本語ドキュメント</a>（日本語ファースト）</td></tr>
+          <tr><th scope="row">開発元</th><td>YANAI Taketo（<a href="https://github.com/Yanai-Taketo/Yagura">github.com/Yanai-Taketo/Yagura</a>）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="kinou">主要機能</h2>
+    <div class="table-scroll">
+      <table>
+        <caption>表 2　主要機能一覧（「既定」欄は導入直後の状態）</caption>
+        <thead>
+          <tr><th scope="col">分類</th><th scope="col">機能</th><th scope="col">概要</th><th scope="col">既定</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row" rowspan="3">受信</th><td>syslog 受信</td><td>UDP 514／TCP 514（IPv4/IPv6）。RFC 3164／RFC 5424 を解析</td><td class="ok">有効</td></tr>
+          <tr><td>syslog over TLS</td><td>TCP 6514（RFC 5425）による暗号化受信</td><td>opt-in</td></tr>
+          <tr><td>解析失敗ログの保全</td><td>規格外メッセージも破棄せず、原文のまま「解析失敗」の印を付けて保存</td><td class="ok">有効</td></tr>
+          <tr><th scope="row" rowspan="2">保存</th><td>ゼロ設定での保存開始</td><td>導入直後から内蔵 SQLite へ保存。設定ファイル・DB 構築作業は不要</td><td class="ok">有効</td></tr>
+          <tr><td>SQL Server への昇格</td><td>管理画面のウィザードで保存先を SQL Server へ切替。パスワードは Windows DPAPI で暗号化保存</td><td>任意</td></tr>
+          <tr><th scope="row" rowspan="2">閲覧</th><td>Web UI</td><td>ダッシュボード・ログ検索・システム状態。ライト／ダーク／OS 追従。時刻はサーバ OS のタイムゾーンでオフセット明示表示</td><td class="ok">有効</td></tr>
+          <tr><td>アクセス制御・HTTPS</td><td>Windows 統合認証 + AD グループによる役割制御（閲覧／管理）、閲覧 UI の HTTPS 化</td><td>opt-in</td></tr>
+          <tr><th scope="row" rowspan="3">運用</th><td>保持期間の自動削除</td><td>既定 30 日。日数・実行時間帯とも設定可能</td><td class="ok">有効</td></tr>
+          <tr><td>能動通知（メール）</td><td>証明書期限接近・スプール退避開始・保存の恒久失敗等を SMTP で通知。再送抑制・流量上限あり</td><td>opt-in</td></tr>
+          <tr><td>送信元の途絶検知</td><td>ウォッチリスト登録元からの受信が閾値時間（既定 24 時間）途絶した際に警告</td><td>opt-in</td></tr>
+          <tr><th scope="row">拡張</th><td>Windows イベントログ転送</td><td>Fluent Bit（Apache-2.0）の配布キットを同梱。管理画面から自機宛設定済みキット（ZIP）を生成。サイレント導入対応</td><td>任意</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="kousei">システム構成と要件</h2>
+    <h3>構成</h3>
+    <p>受信・解析・保存・閲覧の全機能が単一の Windows サービスとして動作する。追加のミドルウェア、Web サーバ、データベースサーバの事前構築は不要である（SQL Server の利用は任意）。MSI の実行により、サービス登録、Windows ファイアウォール規則の作成、内蔵データベースの用意までが完了する。</p>
+    <h3>使用ポート</h3>
+    <div class="table-scroll">
+      <table>
+        <caption>表 3　使用ポート一覧</caption>
+        <thead>
+          <tr><th scope="col">ポート</th><th scope="col">用途</th><th scope="col">既定</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>udp/514</code>・<code>tcp/514</code></td><td>syslog 受信（平文・IPv4/IPv6）</td><td>有効</td></tr>
+          <tr><td><code>tcp/6514</code></td><td>syslog over TLS 受信（RFC 5425）</td><td>無効（opt-in）</td></tr>
+          <tr><td><code>tcp/8514</code></td><td>閲覧 UI（読み取り専用。HTTPS 化は opt-in・同一ポート）</td><td>有効</td></tr>
+          <tr><td><code>tcp/8515</code></td><td>管理 UI</td><td>有効（loopback 限定）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>リソース</h3>
+    <p>必要なディスク容量は受信量と保持期間に依存する。一般的なネットワーク機器のログのみであれば所要量は小さい（試算方法は<a href="../blog/syslog-disk-sizing/">別稿「ディスク容量の見積もり」</a>を参照）。保持期間は既定 30 日の自動削除により管理される。</p>
+
+    <h2 id="security">セキュリティ設計</h2>
+    <h3>設計方針</h3>
+    <p>Yagura は「既定を軽く、強化を明示的に（opt-in）」という方針を採る。導入直後の状態は管理された社内ネットワークでの利用を前提とした最小構成であり、要件に応じて保護機能を段階的に有効化する。</p>
+    <div class="frame">
+      <p class="t">利用の前提（開発元が定める利用上の掟）</p>
+      <ul>
+        <li>管理された社内ネットワーク（信頼できる網の内側）での利用を前提とすること</li>
+        <li>既定の受信は平文（udp・tcp 514）であることを理解のうえ運用すること</li>
+        <li>閲覧 UI は既定で LAN 内に読み取り専用・無認証で公開されることを理解すること</li>
+        <li>インターネットに露出する機器、接続者を統制できないネットワークには設置しないこと</li>
+      </ul>
+    </div>
+    <h3>有効化できる保護機能（いずれも opt-in）</h3>
+    <ul>
+      <li><strong>受信経路の暗号化</strong> — syslog over TLS（tcp/6514・RFC 5425）</li>
+      <li><strong>閲覧 UI のアクセス制御</strong> — Windows 統合認証 + Active Directory グループマッピングにより、「閲覧」「管理」の役割で利用者を制限</li>
+      <li><strong>閲覧 UI の HTTPS 化</strong> — 同一ポートのまま HTTPS へ切替（平文の待ち受けは残らない）。証明書は Windows 証明書ストアから選択し、サーバ名との不一致は保存前に検査。期限切れ時も平文へはフォールバックしない</li>
+      <li><strong>管理 UI の保護</strong> — 既定は loopback 限定。リモート公開する場合は Windows 統合認証（AD/Kerberos）または独自 ID/パスワード認証を要し、HTTPS が必須となる（fail-closed）</li>
+      <li><strong>資格情報の保護</strong> — SQL Server 接続パスワードは Windows DPAPI で暗号化して保存</li>
+    </ul>
+
+    <h2 id="hozen">信頼性とデータ保全</h2>
+    <p>ログ集約基盤の第一の責務は「ログを失わないこと」である。Yagura は以下の設計によりこれに応える。</p>
+    <ul>
+      <li><strong>規格外メッセージの保全</strong> — 解析に失敗したメッセージも破棄せず、原文のまま「解析失敗」の印を付けて保存する</li>
+      <li><strong>取りこぼしの可観測性</strong> — 取りこぼしは発生箇所別カウンタで観測でき、CI（継続的インテグレーション）でも検証されている</li>
+      <li><strong>ディスクスプール</strong> — 保存先データベースの障害時は受信データをディスクへ退避し、復旧後に取り込む</li>
+      <li><strong>途絶の検知</strong> — 送信元単位で受信の途絶を検知し（opt-in）、メール通知に連携できる。「気づかぬうちに収集が止まっていた」事態を防ぐ</li>
+      <li><strong>リリースの完全性</strong> — 配布物には checksum（.sha256）が付され、取得物の同一性を検証できる</li>
+    </ul>
+
+    <h2 id="license">ライセンスとコスト</h2>
+    <h3>ライセンス</h3>
+    <p>Yagura は <a href="https://github.com/Yanai-Taketo/Yagura/blob/main/LICENSE">Apache License 2.0</a> で公開されるオープンソースソフトウェアである。同ライセンスの下で、次の利用が認められる（条文および <a href="https://github.com/Yanai-Taketo/Yagura/blob/main/NOTICE">NOTICE</a> の順守を条件とする）。</p>
+    <ul>
+      <li>商用環境・社内業務システムでの利用（利用料・ライセンス費用は発生しない）</li>
+      <li>複製・再頒布、および必要に応じた改変</li>
+      <li>台数・受信ソース数・ログ量による制限はライセンス上存在しない</li>
+    </ul>
+    <p>同梱される Fluent Bit も Apache License 2.0 で提供される。</p>
+    <div class="frame">
+      <p class="t">免責について</p>
+      <p>Apache License 2.0 の定めにより、本ソフトウェアは「現状のまま（AS IS）」提供され、明示・黙示を問わずいかなる保証も伴わない。導入にあたっては、後述の導入プロセスに沿った自組織での検証を前提とされたい。</p>
+    </div>
+    <h3>コスト構造</h3>
+    <p>ライセンス費用・保守費用は発生しない。導入コストは、既存 Windows サーバ上のリソース（またはサーバの新設）と、導入・運用の人件費のみである。運用に要する技能は Windows サービス・SQL Server・Active Directory の管理といった、Windows 管理者が通常保有するものに限られる。</p>
+
+    <h2 id="process">導入プロセスの推奨</h2>
+    <p>OSS として無保証で提供される性質上、次の段階的な導入を推奨する。</p>
+    <ol>
+      <li><strong>検証（PoC）</strong> — 検証機に MSI を導入し、代表的な機器数台の syslog を受信。解析結果・画面・運用性を確認する（<a href="../blog/windows-syslog-server/">構築手順</a>）。checksum による配布物の検証もこの段階で手順化する</li>
+      <li><strong>パイロット運用</strong> — 対象機器を広げ、内蔵 SQLite のまま一定期間運用。受信量を実測し、<a href="../blog/syslog-disk-sizing/">ディスク容量</a>と<a href="../blog/log-retention-period/">保持期間</a>を確定する。必要に応じて TLS 受信・アクセス制御等の opt-in 機能を評価する</li>
+      <li><strong>本番移行</strong> — 要件に応じて保存先を SQL Server へ昇格し、重要送信元を途絶検知のウォッチリストへ登録、メール通知を有効化する。<a href="../blog/windows-eventlog-syslog/">Windows イベントログの集約</a>もこの段階で展開する</li>
+    </ol>
+
+    <h2 id="release">リリース方針（v1.0 基準）</h2>
+    <p>本番推奨版である v1.0 は、期日ではなく、第三者が検証できる次の基準により定められている。基準は事前に固定されており、達成しやすい形へ変更されることはない。</p>
+    <ol>
+      <li>機能の完備</li>
+      <li>独立した二環境 × 連続三十日の実運用実績</li>
+      <li>利用者向け文書の完備</li>
+      <li>後方互換性の凍結</li>
+      <li>リリースの完全性（コード署名・checksum 等）</li>
+    </ol>
+    <p>現在の到達状況および最新のリリース内容は <a href="https://github.com/Yanai-Taketo/Yagura/releases">GitHub Releases</a> を参照されたい。導入時期の判断（v1.0 到達を待つか、検証を先行するか）の材料として、この基準の透明性をご活用いただきたい。</p>
+
+    <h2 id="support">サポートと問い合わせ</h2>
+    <div class="table-scroll">
+      <table>
+        <caption>表 4　サポート体制</caption>
+        <tbody>
+          <tr><th scope="row">不具合報告・機能要望</th><td><a href="https://github.com/Yanai-Taketo/Yagura/issues">GitHub Issues</a></td></tr>
+          <tr><th scope="row">導入相談・質問</th><td><a href="https://github.com/Yanai-Taketo/Yagura/discussions">GitHub Discussions</a></td></tr>
+          <tr><th scope="row">文書</th><td><a href="https://github.com/Yanai-Taketo/Yagura/tree/main/docs">日本語ドキュメント</a></td></tr>
+          <tr><th scope="row">商用サポート契約</th><td>現時点では提供していない（コミュニティベースの体制）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">応答時間の保証を伴う SLA は存在しない。ベンダーサポート契約が組織要件である場合は、商用製品の選定を含めて<a href="../blog/syslog-server-selection/">選定比較の稿</a>を参照されたい。</p>
+
+    <h2 id="faq">よくある質問（FAQ）</h2>
+    <dl class="faq">
+      <dt>商用環境（企業の業務システム）で無償のまま利用できますか？</dt>
+      <dd>はい。Apache License 2.0 の下で、商用・社内利用・改変を含めライセンス費用なしで利用できます。条文および NOTICE の順守は必要です。</dd>
+      <dt>インターネットに接続できない閉域環境でも導入できますか？</dt>
+      <dd>MSI は self-contained 形式で、.NET ランタイムの事前導入や導入時のオンライン取得を前提としないため、閉域網への持ち込み導入が可能です。</dd>
+      <dt>既存の SQL Server をログ保存先として利用できますか？</dt>
+      <dd>はい。導入直後は内蔵 SQLite に保存され、管理画面のウィザードで既存の SQL Server へ切り替えられます。接続パスワードは Windows DPAPI で暗号化して保存されます。</dd>
+      <dt>ベンダーによる商用サポートは提供されていますか？</dt>
+      <dd>現時点で有償サポート契約は提供していません。GitHub Issues／Discussions によるコミュニティベースの体制であり、ソフトウェアは無保証で提供されます。</dd>
+      <dt>閲覧できる利用者を制限できますか？</dt>
+      <dd>はい。既定は LAN 内に読み取り専用・無認証で公開されますが、Windows 統合認証 + AD グループによる役割制御（閲覧／管理）と HTTPS 化を設定で有効化できます。</dd>
+    </dl>
+
+    <div class="actions">
+      <p>評価用の MSI は下記より取得できる。配布物には checksum（.sha256）が付されている。本資料に関する質問・指摘は GitHub Discussions まで。</p>
+      <p>
+        <a class="btn btn-shu" href="../#haifu">ダウンロード（配布ページへ）</a>
+        <a class="btn" href="https://github.com/Yanai-Taketo/Yagura">GitHub リポジトリ</a>
+        <a class="btn" href="../blog/">技術解説（読みもの）</a>
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<footer class="okuzuke">
+  <p>Yagura（やぐら） — Windows にそのまま置ける OSS の syslog 集約サーバ ／ <a href="../">製品紹介</a> ／ <a href="../blog/">読みもの</a> ／ © YANAI Taketo</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .l { stroke: #26241d; }
+    .h { fill: #a03c26; }
+    @media (prefers-color-scheme: dark) {
+      .l { stroke: #e6dfca; }
+      .h { fill: #cf7350; }
+    }
+  </style>
+  <g class="l" fill="none" stroke-width="2.4" stroke-linecap="round">
+    <path d="M8 30 L13.5 10"/>
+    <path d="M24 30 L18.5 10"/>
+    <path d="M9.5 24.5 L22.5 24.5"/>
+    <path d="M11.5 17.5 L20.5 17.5"/>
+    <path d="M9.5 24.5 L20.5 17.5"/>
+    <path d="M22.5 24.5 L11.5 17.5"/>
+    <path d="M10.5 9.5 L21.5 9.5"/>
+    <path d="M9 8 L16 2.5 L23 8"/>
+  </g>
+  <circle class="h" cx="16" cy="13.2" r="2"/>
+</svg>

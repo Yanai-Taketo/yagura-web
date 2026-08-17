@@ -1,0 +1,569 @@
+@charset "utf-8";
+
+/* ==========================================================
+   やぐら 紹介サイト — 絵巻レイアウト
+   紙（生成り）と墨、差し色は朱ひと色。
+   広い画面: 右から左へ繰る横巻き / 狭い画面: 縦の並び
+   ========================================================== */
+
+:root {
+  --kami: #ece5d2;        /* 紙 — 生成り */
+  --kami-2: #e5ddc7;      /* 紙の重ね */
+  --sumi: #26241d;        /* 墨 */
+  --sumi-usu: #5d574a;    /* 薄墨 */
+  --kei: rgba(38, 36, 29, .22);        /* 細罫 */
+  --kei-koi: rgba(38, 36, 29, .55);    /* 濃罫 */
+  --shu: #a03c26;         /* 朱 — 唯一の差し色 */
+  --shu-ji: #f6f1e2;      /* 朱の上の文字色 */
+  --shiro: #fdfcf8;       /* 貼り込みの台紙 */
+  --tsugime: rgba(38, 36, 29, .09);    /* 紙継ぎの線 */
+  --mincho: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "BIZ UDMincho", "MS PMincho", serif;
+  --mono: Consolas, "Cascadia Mono", "BIZ UDGothic", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kami: #131820;      /* 夜の巻 — 藍鉄 */
+    --kami-2: #1a212b;
+    --sumi: #e6dfca;      /* 生成りの文字 */
+    --sumi-usu: #a59e8a;
+    --kei: rgba(230, 223, 202, .22);
+    --kei-koi: rgba(230, 223, 202, .5);
+    --shu: #cf7350;
+    --shu-ji: #16110c;
+    --shiro: #f4f1e8;
+    --tsugime: rgba(230, 223, 202, .08);
+  }
+}
+
+/* ---------- 素 ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body {
+  height: 100%;
+  background: var(--kami);
+  color: var(--sumi);
+  font-family: var(--mincho);
+  font-size: 15px;
+  line-height: 2.1;
+  letter-spacing: .05em;
+  font-feature-settings: "palt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--kei-koi); text-underline-offset: .3em; }
+a:hover { text-decoration-color: var(--shu); }
+:focus-visible { outline: 2px solid var(--shu); outline-offset: 3px; }
+.scene:focus, .scene:focus-visible { outline: none; } /* 栞やハッシュ移動での擬似フォーカス枠は出さない */
+code { font-family: var(--mono); font-size: .93em; letter-spacing: 0; }
+em { font-style: normal; text-emphasis: filled dot; text-emphasis-color: var(--shu); }
+h1, h2, h3 { font-weight: 600; }
+
+/* 紙の目（ごく薄い揉み紙のむら） */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 200;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .48 0 0 0 0 .42 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.skip {
+  position: fixed; top: 10px; left: 10px; z-index: 300;
+  background: var(--sumi); color: var(--kami);
+  padding: 10px 18px; text-decoration: none;
+  transform: translateY(-240%);
+}
+.skip:focus { transform: none; }
+
+/* ==========================================================
+   固定の道具立て（題箋・栞・手引き・進み具合）
+   ========================================================== */
+.daisen {
+  position: fixed; top: 0; right: 30px; z-index: 100;
+  writing-mode: vertical-rl;
+  background: var(--sumi); color: var(--kami);
+  font-size: 15px; letter-spacing: .3em;
+  padding: 22px 10px 26px;
+}
+
+.shiori {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; flex-direction: row-reverse; gap: 9px;
+}
+.shiori a {
+  writing-mode: vertical-rl;
+  background: var(--kami-2);
+  border: 1px solid var(--kei); border-top: none;
+  color: var(--sumi-usu);
+  font-size: 11.5px; letter-spacing: .28em;
+  padding: 13px 6px 17px;
+  text-decoration: none;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), 50% 100%, 0 calc(100% - 6px));
+  transition: padding-bottom .25s, color .25s;
+}
+.shiori a:hover { color: var(--sumi); padding-bottom: 26px; }
+.shiori a.now {
+  background: var(--sumi); border-color: var(--sumi); color: var(--kami);
+  padding-bottom: 26px;
+}
+.shiori a.shiori-dl { background: var(--shu); border-color: var(--shu); color: var(--shu-ji); }
+.shiori a.shiori-dl:hover, .shiori a.shiori-dl.now { background: var(--shu); border-color: var(--shu); color: var(--shu-ji); }
+
+.tebiki {
+  position: fixed; left: 30px; bottom: 84px; z-index: 100;
+  font-size: 12px; letter-spacing: .18em; color: var(--sumi-usu);
+  transition: opacity .8s;
+}
+.tebiki.is-hidden { opacity: 0; }
+
+.susumi {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 3px; z-index: 100;
+}
+.susumi i {
+  display: block; height: 100%; width: 0;
+  margin-left: auto;             /* 右から左へ満ちる */
+  background: var(--shu);
+}
+
+.obi { display: none; }
+
+/* ==========================================================
+   巻物の機構（広い画面）
+   ========================================================== */
+.emaki { display: block; }
+
+@media (min-width: 768px) {
+  body { overflow: hidden; }
+  .emaki {
+    height: 100vh; height: 100dvh;
+    overflow-x: auto; overflow-y: hidden;
+    direction: rtl;                       /* 巻頭を右端に置く */
+    scrollbar-width: none;
+  }
+  .emaki::-webkit-scrollbar { display: none; }
+  .maki {
+    direction: ltr;
+    display: flex; flex-direction: row-reverse;  /* 文書順 = 右から左 */
+    height: 100%; width: max-content;
+    /* 地の線 — 全景を貫く一本 / 紙継ぎ — 一定間隔の縦の継ぎ目 */
+    background-image:
+      linear-gradient(to top,
+        transparent 66px, var(--kei-koi) 66px, var(--kei-koi) 67.5px, transparent 67.5px),
+      repeating-linear-gradient(to left,
+        transparent 0, transparent 719px, var(--tsugime) 719px, var(--tsugime) 720px);
+  }
+
+  /* 巻き残りの陰 — 画面の両端で紙が軸へ巻き込まれてゆく気配 */
+  .emaki::before, .emaki::after {
+    content: "";
+    position: fixed; top: 0; bottom: 0; width: 46px;
+    z-index: 95; pointer-events: none;
+  }
+  .emaki::before { left: 0;  background: linear-gradient(90deg,  rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)); }
+  .emaki::after  { right: 0; background: linear-gradient(270deg, rgba(0, 0, 0, .13), rgba(0, 0, 0, 0)); }
+
+  /* 八双（右端の端木）と軸（左端の芯木） */
+  .hassou, .jiku { flex: 0 0 auto; height: 100%; position: relative; }
+  .hassou {
+    width: 14px;
+    background: linear-gradient(90deg, #46403a, #221d16);
+    box-shadow: -14px 0 24px -8px rgba(0, 0, 0, .28);
+  }
+  .jiku {
+    width: 38px;
+    background: linear-gradient(90deg, #4a3823, #8a6b46 28%, #6b4f30 55%, #2f2211);
+    box-shadow: 14px 0 24px -8px rgba(0, 0, 0, .3);
+  }
+  .jiku::before, .jiku::after {
+    content: "";
+    position: absolute; left: -4px; right: -4px; height: 18px;
+    background: #241a10; border-radius: 3px;
+  }
+  .jiku::before { top: 0; }
+  .jiku::after  { bottom: 0; }
+  .scene {
+    flex: 0 0 auto;
+    height: 100%;
+    padding: 104px 64px 118px;
+    display: flex; flex-direction: row-reverse;  /* 題は右、本文は左へ */
+    gap: 52px;
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  .scene::-webkit-scrollbar { display: none; }
+
+  /* 段ごとの幅 */
+  #kanto     { width: 1040px; padding-right: 128px; }
+  #kuhaku    { width: 900px; }
+  .scene-dan { width: 540px; }
+  #jikken    { width: 1280px; }
+  #midokoro  { width: 1420px; }
+  #shikumi   { width: 1120px; }
+  #kokoroe   { width: 760px; }
+  #michinori { width: 660px; }
+  #izanai    { width: 660px; }
+  #haifu     { width: 800px; }
+  #okuzuke   { width: 800px; }
+
+  /* 縦書き */
+  .vtext {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-feature-settings: "palt" 1, "vpal" 1;
+  }
+}
+
+/* 段の題（縦の見出し + 落款） */
+.sec-head {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  flex: 0 0 auto;
+}
+.sec-head h2 {
+  font-size: clamp(26px, 4.6vh, 38px);
+  letter-spacing: .28em;
+  line-height: 1;
+}
+.rakkan {
+  writing-mode: vertical-rl;
+  border: 2px solid var(--shu); color: var(--shu);
+  font-size: 12px; letter-spacing: .22em; line-height: 1.5;
+  padding: 9px 5px;
+}
+.rakkan-shu { background: var(--shu); color: var(--shu-ji); }
+
+.sec-body { flex: 0 1 auto; align-self: center; max-width: 34em; }
+.sec-body-wide { max-width: none; flex: 1 1 auto; }
+.sec-body > p + p { margin-top: 1.2em; }
+.soe { font-size: 13px; color: var(--sumi-usu); margin-top: 1.6em; }
+
+/* ==========================================================
+   巻頭
+   ========================================================== */
+.scene-kanto { align-items: stretch; position: relative; }
+.kanto-catch { display: flex; flex-direction: row-reverse; gap: 26px; align-items: flex-start; }
+.kanto-catch h1 {
+  font-size: clamp(38px, 7.4vh, 60px);
+  letter-spacing: .16em;
+  line-height: 1.85;
+}
+.kanto-yomi { font-size: 13px; letter-spacing: .5em; color: var(--sumi-usu); padding-top: .6em; }
+.kanto-lead { align-self: center; max-width: 30em; }
+.lead { font-size: 15.5px; line-height: 2.4; }
+.tanzaku {
+  list-style: none;
+  display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 14px;
+  margin: 34px 0 0;
+}
+.tanzaku li { border: 1px solid var(--kei-koi); padding: 18px 8px 22px; }
+.tanzaku .vtext { font-size: 13px; letter-spacing: .26em; }
+.kanto-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
+.kanto-port { font-family: var(--mono); font-size: 12px; letter-spacing: .02em; color: var(--sumi-usu); margin-top: 26px; }
+.nowrap { white-space: nowrap; }
+.kanto-tower { align-self: flex-end; flex: 0 0 auto; margin-bottom: -46px; }
+
+.tower-line { stroke: var(--sumi); }
+.tower-sign { stroke: var(--shu); }
+.tower-sign-dot { fill: var(--shu); }
+.tower-hi { fill: transparent; }
+
+/* ---------- 釦 ---------- */
+.btn {
+  display: inline-block;
+  border: 1px solid var(--sumi);
+  padding: 13px 30px;
+  font-family: var(--mincho);
+  font-size: 14px; letter-spacing: .22em; text-indent: .22em;
+  line-height: 1.6;
+  color: var(--sumi); background: transparent;
+  text-decoration: none;
+  transition: background .2s, color .2s;
+}
+.btn:hover { background: var(--sumi); color: var(--kami); }
+.btn-shu { border-color: var(--shu); background: var(--shu); color: var(--shu-ji); }
+.btn-shu:hover { background: transparent; color: var(--shu); }
+
+/* ==========================================================
+   序・空白地帯
+   ========================================================== */
+.table-scroll { overflow-x: auto; margin-top: 2em; }
+.kurabe { border-collapse: collapse; min-width: 620px; }
+.kurabe caption {
+  text-align: left; font-size: 12px; letter-spacing: .3em;
+  color: var(--sumi-usu); padding-bottom: 10px;
+}
+.kurabe th, .kurabe td {
+  border: 1px solid var(--kei);
+  padding: 13px 18px;
+  font-size: 13px; line-height: 1.95; letter-spacing: .03em;
+  text-align: left; vertical-align: top; font-weight: 400;
+}
+.kurabe thead th { font-weight: 600; letter-spacing: .08em; white-space: nowrap; }
+.kurabe tbody th { white-space: nowrap; color: var(--sumi-usu); }
+.kurabe .ware { border-left: 2px solid var(--shu); border-right: 2px solid var(--shu); }
+.kurabe thead .ware { border-top: 2px solid var(--shu); color: var(--shu); }
+.kurabe tbody tr:last-child .ware { border-bottom: 2px solid var(--shu); }
+
+/* ==========================================================
+   導入三段
+   ========================================================== */
+.scene-dan { position: relative; }
+.dan-num {
+  position: absolute; top: 96px; left: 34px;
+  font-size: 210px; line-height: 1; color: var(--sumi);
+  opacity: .06; pointer-events: none; user-select: none;
+}
+
+/* ==========================================================
+   実見・画面
+   ========================================================== */
+.jikken-grid {
+  display: flex; flex-direction: row-reverse;
+  gap: 30px; align-self: center; align-items: flex-start;
+}
+.harikomi {
+  background: var(--shiro);
+  border: 1px solid var(--kei-koi);
+  padding: 9px;
+}
+.harikomi figcaption {
+  font-size: 11.5px; letter-spacing: .18em; color: var(--sumi-usu);
+  padding: 9px 2px 1px;
+}
+.harikomi-main { width: min(52vw, 690px); }
+.harikomi-fuku { display: flex; flex-direction: column; gap: 16px; width: 232px; }
+
+/* 貼り込みは押して拡大できる */
+.harikomi-btn {
+  display: block; width: 100%;
+  padding: 0; border: 0; background: none;
+  font: inherit; color: inherit;
+  cursor: zoom-in;
+}
+.harikomi-btn img { transition: opacity .2s; }
+.harikomi-btn:hover img { opacity: .85; }
+
+/* ==========================================================
+   披見 — 貼り込みの拡大表示
+   ========================================================== */
+.hiken {
+  margin: auto;                     /* 素のリセットで消える UA の中央寄せを戻す */
+  border: 1px solid var(--kei-koi);
+  background: var(--shiro);
+  padding: 10px;
+  max-width: min(1160px, calc(100vw - 64px));
+  max-height: calc(100vh - 56px);
+  overflow: visible;
+}
+.hiken::backdrop { background: rgba(19, 16, 10, .82); }
+.hiken img {
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  width: auto; height: auto;
+  margin: 0 auto;
+}
+.hiken figcaption {
+  font-size: 11.5px; letter-spacing: .18em; color: #5d574a;
+  padding: 9px 2px 1px;
+}
+.hiken-close {
+  position: absolute; top: -1px; right: 16px;
+  writing-mode: vertical-rl;
+  border: 0; cursor: pointer;
+  background: #26241d; color: #ece5d2;
+  font-family: var(--mincho); font-size: 12px; letter-spacing: .2em;
+  padding: 13px 7px 15px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5px), 50% 100%, 0 calc(100% - 5px));
+}
+.hiken-close:hover { background: var(--shu); color: var(--shu-ji); }
+
+/* ==========================================================
+   見どころ・機能
+   ========================================================== */
+.kinou {
+  list-style: none;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(5, 236px);
+  grid-auto-rows: 1fr;
+  gap: 1px;
+  background: var(--kei);
+  border: 1px solid var(--kei);
+}
+.kinou li { background: var(--kami); padding: 22px 20px; }
+.kinou h3 { font-size: 15px; letter-spacing: .08em; line-height: 1.7; margin-bottom: 10px; }
+.kinou p { font-size: 12px; line-height: 1.95; color: var(--sumi-usu); letter-spacing: .02em; }
+
+/* ==========================================================
+   仕組み
+   ========================================================== */
+.zukai { margin-top: 1.6em; }
+.zukai svg { width: 100%; max-width: 920px; height: auto; }
+.z-line { stroke: var(--sumi); }
+.z-text text { fill: var(--sumi); font-family: var(--mincho); font-size: 14px; letter-spacing: .05em; }
+.z-text .z-small { font-size: 11.5px; fill: var(--sumi-usu); }
+.z-text .z-mono { font-family: var(--mono); letter-spacing: 0; }
+.z-text .z-strong { font-weight: 600; letter-spacing: .12em; }
+
+.minato {
+  margin-top: 1.8em;
+  display: grid; grid-template-columns: max-content 1fr;
+  column-gap: 26px;
+  max-width: 560px;
+}
+.minato dt, .minato dd {
+  border-top: 1px solid var(--kei);
+  padding: 7px 0;
+  font-size: 12.5px;
+}
+.minato dd { color: var(--sumi-usu); }
+
+/* ==========================================================
+   心得（高札）
+   ========================================================== */
+.kousatsu {
+  position: relative;
+  border: 1.5px solid var(--sumi);
+  background: var(--kami-2);
+  padding: 30px 34px 26px;
+}
+.kousatsu::before {
+  content: "";
+  position: absolute; inset: 5px;
+  border: 1px solid var(--kei);
+  pointer-events: none;
+}
+.kousatsu-dai {
+  font-size: 21px; letter-spacing: .9em; text-indent: .9em;
+  text-align: center; margin-bottom: 14px;
+}
+.kousatsu ul { list-style: none; }
+.kousatsu li {
+  font-size: 13.5px; line-height: 2.3; letter-spacing: .04em;
+  padding-left: 1.3em; text-indent: -1.3em;
+}
+
+/* ==========================================================
+   道のり
+   ========================================================== */
+.kijun { list-style: none; counter-reset: kijun; margin-top: 1.4em; }
+.kijun li {
+  counter-increment: kijun;
+  border-top: 1px solid var(--kei);
+  padding: 10px 4px;
+  font-size: 14px;
+}
+.kijun li:last-child { border-bottom: 1px solid var(--kei); }
+.kijun li::before {
+  content: "其の" counter(kijun, cjk-ideographic) "　";
+  color: var(--shu); font-size: 12px; letter-spacing: .1em;
+}
+
+/* ==========================================================
+   配布
+   ========================================================== */
+.dl-jou { display: flex; align-items: center; gap: 16px; min-height: 46px; }
+.dl-seal {
+  display: inline-block;
+  border: 2px solid var(--shu); color: var(--shu);
+  font-size: 19px; letter-spacing: .1em;
+  padding: 4px 14px;
+  font-feature-settings: "palt" 1, "tnum" 1;
+}
+.dl-date { font-size: 12.5px; color: var(--sumi-usu); letter-spacing: .08em; }
+.dl-status { font-size: 13px; color: var(--sumi-usu); margin-top: .6em; }
+.dl-btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 1.6em; }
+.btn-dl { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; padding: 15px 32px; }
+.btn-dl small { font-size: 10.5px; letter-spacing: .12em; opacity: .8; font-family: var(--mono); }
+.dl-sha { margin-top: 1.2em; font-size: 12px; display: flex; gap: 22px; flex-wrap: wrap; }
+.dl-notes { margin-top: 1.6em; font-size: 13px; }
+
+/* ==========================================================
+   奥付
+   ========================================================== */
+.scene-okuzuke { position: relative; }
+.okuzuke-dai { font-size: clamp(24px, 4vh, 34px); letter-spacing: .3em; align-self: flex-start; }
+.okuzuke-cols { align-self: center; }
+@media (min-width: 768px) {
+  .okuzuke-cols {
+    writing-mode: vertical-rl;
+    height: min(58vh, 470px);
+    font-feature-settings: "palt" 1, "vpal" 1;
+  }
+  .okuzuke-cols dt { margin-block-end: 6px; }
+  .okuzuke-cols dd { margin-block-end: 30px; }
+}
+.okuzuke-cols dt { color: var(--shu); font-size: 11.5px; letter-spacing: .5em; }
+.okuzuke-cols dd { font-size: 13.5px; letter-spacing: .1em; line-height: 2; }
+.okuzuke-cr { font-size: 11.5px; color: var(--sumi-usu); letter-spacing: .2em; margin-block-start: 10px; }
+
+/* ==========================================================
+   夜の巻（暗色）での加減
+   ========================================================== */
+@media (prefers-color-scheme: dark) {
+  .daisen { background: var(--kami-2); color: var(--sumi); border: 1px solid var(--kei); border-top: none; }
+  .tower-hi { fill: var(--shu); filter: drop-shadow(0 0 7px rgba(207, 115, 80, .9)); }
+  .harikomi { border-color: var(--kei); }
+  .btn:hover { color: var(--kami); }
+  .jiku { background: linear-gradient(90deg, #241d13, #4a3b26 28%, #352818 55%, #120d07); }
+  .emaki::before { background: linear-gradient(90deg,  rgba(0, 0, 0, .3), rgba(0, 0, 0, 0)); }
+  .emaki::after  { background: linear-gradient(270deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, 0)); }
+}
+
+/* ==========================================================
+   狭い画面 — 縦の並びに畳む
+   ========================================================== */
+@media (max-width: 767.98px) {
+  body { overflow: auto; }
+  .daisen, .shiori, .tebiki, .susumi { display: none; }
+
+  .obi {
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    background: var(--kami);
+    border-bottom: 1px solid var(--kei);
+    padding: 13px 20px;
+  }
+  .obi-logo { font-size: 17px; letter-spacing: .4em; font-weight: 600; }
+  .obi-dl {
+    font-size: 12.5px; letter-spacing: .15em; text-decoration: none;
+    border: 1px solid var(--shu); color: var(--shu);
+    padding: 7px 16px;
+  }
+
+  .scene { padding: 52px 22px 56px; border-bottom: 1px solid var(--kei); scroll-margin-top: 58px; }
+  .sec-head { flex-direction: row; align-items: center; gap: 16px; margin-bottom: 22px; }
+  .sec-head h2 { font-size: 25px; letter-spacing: .2em; }
+  .sec-body { max-width: none; }
+
+  .kanto-catch { margin-bottom: 26px; flex-direction: row; }
+  .kanto-catch h1 { font-size: clamp(30px, 8.5vw, 40px); line-height: 1.7; letter-spacing: .1em; }
+  .kanto-yomi { display: none; }
+  .tanzaku { flex-direction: row; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+  .tanzaku li { padding: 8px 15px; }
+  .tanzaku .vtext { letter-spacing: .12em; }
+  .kanto-tower { margin: 30px auto 0; }
+  .kanto-tower svg { width: 170px; height: auto; }
+
+  .dan-num { top: 40px; right: 18px; left: auto; font-size: 120px; }
+
+  .jikken-grid { display: block; }
+  .harikomi-main { width: auto; }
+  .harikomi-fuku { flex-direction: column; width: auto; margin-top: 16px; }
+
+  .kinou { grid-template-columns: 1fr; }
+
+  .zukai { overflow-x: auto; }
+  .zukai svg { min-width: 760px; }
+
+  .okuzuke-cols dl { display: grid; grid-template-columns: max-content 1fr; column-gap: 20px; row-gap: 8px; }
+  .jiku, .hassou { display: none; }
+
+  .hiken { max-width: calc(100vw - 24px); }
+  .hiken-close { right: 10px; }
+}
+
+/* ---------- 揺れを好まぬ方へ ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

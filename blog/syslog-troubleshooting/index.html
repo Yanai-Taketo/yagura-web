@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>syslog が届かない・受信できないときの確認手順【チェックリスト】 | Yagura 読みもの</title>
+  <meta name="description" content="機器の syslog がサーバに届かない・受信できないときの切り分け手順をチェックリスト形式で解説。送信側の設定、経路（ファイアウォール・ACL）、受信側のポート待ち受け・514 番の競合、形式の問題、恒常的な途絶の監視まで。">
+  <link rel="canonical" href="https://yagura.ta-yan.ai/blog/syslog-troubleshooting/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="syslog が届かない・受信できないときの確認手順【チェックリスト】">
+  <meta property="og:description" content="syslog が届かないときの切り分けを、送信側→経路→受信側→形式の順のチェックリストで解説。">
+  <meta property="og:url" content="https://yagura.ta-yan.ai/blog/syslog-troubleshooting/">
+  <meta property="og:image" content="https://yagura.ta-yan.ai/images/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="article:published_time" content="2026-07-26">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ece5d2">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131820">
+  <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/favicon-180.png">
+  <link rel="stylesheet" href="../../css/blog.css">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "syslog が届かない・受信できないときの確認手順【チェックリスト】",
+  "description": "syslog が届かないときの切り分けを、送信側→経路→受信側→形式の順のチェックリストで解説。",
+  "url": "https://yagura.ta-yan.ai/blog/syslog-troubleshooting/",
+  "mainEntityOfPage": "https://yagura.ta-yan.ai/blog/syslog-troubleshooting/",
+  "datePublished": "2026-07-26",
+  "dateModified": "2026-07-26",
+  "inLanguage": "ja",
+  "image": "https://yagura.ta-yan.ai/images/ogp.png",
+  "author": {
+    "@type": "Person",
+    "name": "YANAI Taketo",
+    "url": "https://github.com/Yanai-Taketo"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "YANAI Taketo"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Yagura",
+      "item": "https://yagura.ta-yan.ai/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "読みもの",
+      "item": "https://yagura.ta-yan.ai/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "syslog が届かない・受信できないときの確認手順【チェックリスト】"
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+
+<a class="skip" href="#honbun">本文へ移動</a>
+<a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
+
+<header class="obi">
+  <div class="obi-in">
+    <a class="obi-home" href="../../">Yagura</a>
+    <a class="obi-yomi" href="../" style="text-decoration:none">読みもの</a>
+    <a class="obi-dl" href="../../#haifu">ダウンロード</a>
+  </div>
+</header>
+
+<main class="shimen">
+
+  <nav class="michishirube" aria-label="現在地">
+    <ol>
+      <li><a href="../../">Yagura</a></li>
+      <li><a href="../">読みもの</a></li>
+      <li>syslog が届かないときの確認手順</li>
+    </ol>
+  </nav>
+
+  <article>
+    <header class="kiji-head">
+      <p class="kiji-kan">保守</p>
+      <h1>syslog が届かない・受信できないときの確認手順【チェックリスト】</h1>
+      <p class="kiji-meta">
+        <span>公開 2026年7月26日</span>
+        <span>筆 YANAI Taketo（Yagura 版元）</span>
+      </p>
+      <p class="kiji-lead">送信先を設定したのに、ログが一件も届かない —— syslog 導入で最初につまずくのがここです。UDP の syslog は<em>失敗してもエラーを返さない</em>ため、闇雲に見ても原因は掴めません。本稿では、送信側 → 経路 → 受信側 → 形式の順に潰していく確認手順をチェックリストとして示します。</p>
+    </header>
+
+    <nav class="shiori-box" aria-label="目次">
+      <p>目　次</p>
+      <ol>
+        <li><a href="#junjo">切り分けの順序 — 上流から下流へ</a></li>
+        <li><a href="#soushin">一. 送信側を確認する</a></li>
+        <li><a href="#keiro">二. 経路を確認する</a></li>
+        <li><a href="#jushin">三. 受信側を確認する</a></li>
+        <li><a href="#keishiki">四. 「届いているのに見えない」場合</a></li>
+        <li><a href="#kanshi">再発に備える — 途絶の監視</a></li>
+      </ol>
+    </nav>
+
+    <div class="kiji" id="honbun">
+
+      <h2 id="junjo">切り分けの順序 — 上流から下流へ</h2>
+      <p>ログの流れは「機器（送信）→ ネットワーク（経路）→ サーバ（受信・保存・表示）」の一本道です。切り分けもこの順に、上流から下流へ確認していくのが最短です。途中を飛ばして受信側だけいじり続けるのが、最もよくある遠回りです。</p>
+
+      <h2 id="soushin">一. 送信側を確認する</h2>
+      <ul>
+        <li><strong>宛先 IP・ポートは正しいか</strong> —— タイプミス、別セグメントの旧サーバ宛のまま、といった単純ミスがまず疑われます。</li>
+        <li><strong>UDP／TCP の別は合っているか</strong> —— 機器は UDP で送っているのにサーバは TCP しか待っていない（またはその逆）という食い違い。</li>
+        <li><strong>送信レベルが厳しすぎないか</strong> —— Error（3）以上のみ送る設定だと、平常時は「何も起きないから何も届かない」だけかもしれません。テスト中は Informational（6）まで緩めます。</li>
+        <li><strong>設定は保存・反映されたか</strong> —— CLI 機器の保存忘れ、GUI 機器の「適用」押し忘れ。</li>
+        <li><strong>テストログを出せるか</strong> —— 管理画面へのログイン・ログアウトなど、確実にログが出る操作を意図的に行い、送信のきっかけを作ります。</li>
+      </ul>
+
+      <h2 id="keiro">二. 経路を確認する</h2>
+      <ul>
+        <li><strong>途中のファイアウォール・ACL</strong> —— 機器とサーバの間に FW や L3 スイッチの ACL があるなら、<code>udp/514</code>（および使うなら <code>tcp/514</code>）が許可されているかを確認します。</li>
+        <li><strong>そもそも疎通はあるか</strong> —— サーバから機器へ <code>ping</code>、TCP を使うなら PowerShell の <code>Test-NetConnection 機器IP -Port 514</code>（※これは TCP の確認で、UDP の到達は確認できません）。</li>
+        <li><strong>UDP は「静かに」失われる</strong> —— UDP では経路で破棄されてもエラーが出ません。疑わしい場合、サーバ側でパケットキャプチャを取り、514 宛のパケットがサーバまで到達しているかを直接確かめるのが決定打になります。</li>
+      </ul>
+
+      <h2 id="jushin">三. 受信側を確認する</h2>
+      <ul>
+        <li><strong>サービスは動いているか</strong> —— syslog サーバのサービスが起動しているか。Windows なら「サービス」画面で確認します。</li>
+        <li><strong>514 番を待ち受けているか</strong> —— コマンドプロンプトで次を実行し、514 の待ち受けが見えるか確認します。
+<pre><code>netstat -ano | findstr :514</code></pre></li>
+        <li><strong>514 番の競合はないか</strong> —— 過去に入れた別のログツールが 514 を掴んだままだと、後から入れたサーバは受信できません。上記 <code>netstat</code> の PID からプロセスを特定します。</li>
+        <li><strong>Windows ファイアウォールの受信規則</strong> —— 514 の受信許可規則があるか。<a href="../../">Yagura</a> の MSI は規則を自動作成しますが、手動構築のサーバやセキュリティソフト併用時は要確認です。</li>
+      </ul>
+
+      <h2 id="keishiki">四. 「届いているのに見えない」場合</h2>
+      <p>パケットは届いているのに画面に出ない場合、検索条件（期間・ホスト・重要度）で絞れてしまっているか、メッセージ形式の問題が考えられます。規格から外れた形式のログを黙って捨てる実装だと、この段階の切り分けは困難になります。Yagura は解析に失敗したメッセージも原文のまま「解析失敗」の印付きで保存し、取りこぼしを発生箇所別カウンタで観測できるため、「届いたが解析できなかった」のか「そもそも届いていない」のかをシステム状態画面で区別できます。</p>
+
+      <h2 id="kanshi">再発に備える — 途絶の監視</h2>
+      <p>一度直しても、機器交換や設定の巻き戻りで syslog は再び止まります。そして止まったことには、誰も気づきません。恒常対策として、重要な送信元は途絶検知のウォッチリスト（Yagura では opt-in、既定 24 時間の閾値）に登録し、受信が途絶えたら警告が上がるようにしておきましょう。「届かない」を調査から発見の対象へ変えるのが、このチェックリストの最終項です。</p>
+
+    </div>
+
+    <aside class="musubi">
+      <h2>結び — 上流から順に、一つずつ</h2>
+      <p>送信側 → 経路 → 受信側 → 形式。この順で一つずつ確かめれば、原因は必ずどこかの段で見つかります。受信状況や解析失敗を観測できる受け手を使うことも、切り分けを速くする立派な対策です。</p>
+      <p>
+        <a class="btn btn-shu" href="../../#haifu">Yagura をダウンロード</a>
+        <a class="btn" href="../network-device-syslog-config/">機器側の設定記事を読む</a>
+      </p>
+    </aside>
+
+    <nav class="tsugi" aria-label="次の読みもの">
+      <p class="fu">次に読む</p>
+      <p><a href="../network-device-syslog-config/">ネットワーク機器の syslog 送信設定まとめ — FW・スイッチ・AP・UPS</a></p>
+      <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
+    </nav>
+  </article>
+
+</main>
+
+<footer class="okuzuke">
+  <div class="okuzuke-in">
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p class="cr">© YANAI Taketo</p>
+  </div>
+</footer>
+
+</body>
+</html>
