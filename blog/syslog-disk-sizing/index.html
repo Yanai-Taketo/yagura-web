@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +70,7 @@
 }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -146,6 +147,8 @@
       </div>
       <p>見てのとおり、通常の機器ログだけなら容量は拍子抜けするほど小さく、今どきのサーバなら誤差の範囲です。桁が変わるのは、トラフィックログや <a href="../windows-eventlog-syslog/">Windows イベントログ</a>のような大量ソースを加えたときです。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="overhead">データベースのオーバーヘッドを見込む</h2>
       <p>受信した生データをデータベースに保存すると、インデックスや管理領域の分だけ実消費は膨らみます。実効で生データの 2〜3 倍を見込んでおけば、まず不足しません。上の試算表はすでに 2 倍を織り込んだ値です。</p>
       <p>また、保存先の選択も容量設計の一部です。Yagura は内蔵 SQLite で始めて、ログ量が育ったら管理画面のウィザードで SQL Server へ昇格できるため、「最初から大きな器を用意する」必要がありません。</p>
@@ -173,6 +176,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../log-retention-period/">ログの保存期間はどのくらい必要？ 目安と設計の考え方</a></p>
@@ -184,10 +189,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

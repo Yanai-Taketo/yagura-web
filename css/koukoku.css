@@ -1,0 +1,62 @@
+@charset "utf-8";
+
+/* ==========================================================
+   やぐら — 広告（こうこく）の枠
+   紙と墨の意匠を崩さぬよう、罫一本と小さな札で囲うだけに留める。
+   本文の流れを断たぬこと、押しつけぬこと。
+   色は blog.css / style.css の変数をそのまま借りる。
+   ========================================================== */
+
+/* 枠。js/koukoku.js が中身を入れるまでは空。
+   空のあいだは余白を取らない（JavaScript が動かぬ環境では、これが最終の姿）。
+   display:none にはしない —— 描画されない要素は IntersectionObserver が
+   決して捉えず、遅延読み込みの合図がこなくなるため。 */
+.koukoku { margin: 46px 0; clear: both; }
+.koukoku:empty { margin: 0; min-height: 1px; }
+
+/* 小さな札（「広告」または「案内」）と、そこから伸びる一本の罫 */
+.koukoku-fuda {
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 0 12px;
+  font-size: 11px; letter-spacing: .34em;
+  color: var(--sumi-usu);
+  -webkit-user-select: none; user-select: none;
+}
+.koukoku-fuda::after {
+  content: ""; flex: 1 1 auto; height: 1px; background: var(--kei);
+}
+
+/* 広告の地。高さを先に確保して、紙面が跳ねぬようにする。 */
+.koukoku-ba { min-height: 250px; }
+.koukoku-ba > ins.adsbygoogle { display: block; width: 100%; }
+
+/* 自前の案内（広告が入らぬとき・出さぬときの差し替え） */
+.koukoku-jimae {
+  min-height: 250px;
+  display: flex; flex-direction: column; justify-content: center; gap: 12px;
+  border: 1px solid var(--kei);
+  background: var(--kami-2);
+  padding: 26px 28px 28px;
+}
+.koukoku-dai {
+  margin: 0; font-size: 17px; font-weight: 600;
+  letter-spacing: .08em; line-height: 1.7;
+}
+.koukoku-bun {
+  margin: 0; font-size: 13.5px; line-height: 1.95;
+  color: var(--sumi-usu); letter-spacing: .02em;
+}
+.koukoku-jimae .btn { margin: 6px 0 0; align-self: flex-start; }
+
+/* 狭い画面 —— 余白を詰め、確保する高さも控えめに */
+@media (max-width: 720px) {
+  .koukoku { margin: 38px 0; }
+  .koukoku-ba, .koukoku-jimae { min-height: 220px; }
+  .koukoku-jimae { padding: 22px 20px 24px; }
+  .koukoku-dai { font-size: 16px; }
+}
+
+/* 刷るときは出さない（企業内で配る資料に広告は要らない） */
+@media print {
+  .koukoku { display: none !important; }
+}

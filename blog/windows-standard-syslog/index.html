@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +70,7 @@
 }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -127,6 +128,8 @@
       </ul>
       <p>つまり「Windows 同士でログを寄せる」道は標準にありますが、「機器の syslog を受ける」道は標準にはない、というのが正確な整理です。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="sentakushi">現実的な選択肢は四つ</h2>
       <p>では Windows 中心の環境で syslog を受けるにはどうするか。選択肢は次の四つに集約されます。</p>
       <div class="table-scroll">
@@ -159,6 +162,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
@@ -170,10 +175,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

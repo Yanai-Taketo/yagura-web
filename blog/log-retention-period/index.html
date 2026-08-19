@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +70,7 @@
 }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -140,6 +141,8 @@
       </div>
       <p>すべてのログを最長に合わせる必要はありません。認証・操作系の証跡は長く、機器の状態通知は短く、と<em>ログの種類で期間を変える</em>のも合理的な設計です。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="kettei">自社の期間を決める手順</h2>
       <ul>
         <li><strong>一. 課されている要求を洗う</strong> —— 業法・契約・認証・社内規程。あればそれが下限になります</li>
@@ -163,6 +166,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../syslog-disk-sizing/">syslog サーバのディスク容量はどれくらい必要？ 見積もりの計算式</a></p>
@@ -174,10 +179,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

@@ -19,6 +19,7 @@
   <link rel="icon" href="../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../images/favicon-180.png">
   <link rel="stylesheet" href="../css/blog.css">
+  <link rel="stylesheet" href="../css/koukoku.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -31,7 +32,7 @@
   }
   </script>
 </head>
-<body>
+<body data-root="../">
 
 <a class="skip" href="#mokuroku">記事一覧へ移動</a>
 <a class="daisen" href="../" aria-label="Yagura トップへ">Yagura</a>
@@ -141,14 +142,18 @@
     </li>
   </ul>
 
+  <div class="koukoku" data-koukoku="mokuroku-shita"></div>
+
 </main>
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../">紹介の巻（トップ）</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../#haifu">ダウンロード</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../">紹介の巻（トップ）</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../#haifu">ダウンロード</a> ／ <a href="../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../js/koukoku.js" defer></script>
 
 </body>
 </html>

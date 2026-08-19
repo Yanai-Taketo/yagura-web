@@ -204,7 +204,7 @@ body::before {
   #michinori { width: 660px; }
   #izanai    { width: 660px; }
   #haifu     { width: 800px; }
-  #okuzuke   { width: 800px; }
+  #okuzuke   { width: auto; }   /* 欄の数に合わせて伸びる（奥付は項目が増えても見切れさせない） */
 
   /* 縦書き */
   .vtext {

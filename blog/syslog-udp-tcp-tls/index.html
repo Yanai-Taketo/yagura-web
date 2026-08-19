@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +70,7 @@
 }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -141,6 +142,8 @@
       </div>
       <p>実務の指針としては、<strong>まず UDP で全機器の受信を始め、監査・セキュリティ上重要な送信元だけ TCP 対応を確認して切り替える</strong>のが現実的です。完璧な方式を選ぶことより、受信を始めて実データで欠落の有無を観測するほうが、はるかに前進します。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="tls">syslog over TLS（tcp/6514）は必要か</h2>
       <p>UDP も TCP も、514 のままでは<em>平文</em>です。経路上で盗み見・改竄され得ることは、方式を問わず変わりません。RFC 5425 の syslog over TLS（既定ポート <code>tcp/6514</code>）は、この経路を暗号化します。</p>
       <p>必要になるのは、たとえば次のような場面です。</p>
@@ -165,6 +168,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../syslog-server-basics/">syslog サーバとは？ 仕組み・ポート・RFC を基礎から解説</a></p>
@@ -176,10 +181,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

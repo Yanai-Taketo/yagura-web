@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,7 +49,7 @@
   }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -110,6 +111,8 @@
       </ul>
       <p>送信は基本的に一方通行で、送信元は「届いたかどうか」を確認しません（UDP の場合）。この割り切りが構成を単純にしている一方、後述するとおり、受け側の設計 —— 取りこぼさない、読めなくても捨てない —— が重要になります。</p>
 
+      <div class="koukoku" data-koukoku="honbun-hajime"></div>
+
       <h2 id="port">ポート番号 — UDP/TCP 514 と TLS 6514</h2>
       <p>syslog で使われる代表的なポートは次の三つです。</p>
       <div class="table-scroll">
@@ -143,6 +146,8 @@
       </ul>
       <p>集約後の検索では、このシビリティが最初のフィルタになります。「まず Warning（4）以上だけを眺める」「Error（3）以上は通知する」といった運用の軸を作れるからです。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="merit">syslog サーバを導入するメリット</h2>
       <p>ログを各機器に置いたままにせず、syslog サーバへ集約することには、次のような利点があります。</p>
       <ul>
@@ -170,6 +175,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
@@ -181,10 +188,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

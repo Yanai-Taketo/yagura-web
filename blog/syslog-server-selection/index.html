@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,7 +49,7 @@
   }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -105,6 +106,8 @@
         <li><strong>運用負荷</strong> —— パッチ適用、容量管理、障害対応など、日常の手離れの良さ</li>
       </ul>
 
+      <div class="koukoku" data-koukoku="honbun-hajime"></div>
+
       <h2 id="shouyou">商用の syslog／ログ管理製品</h2>
       <p>商用製品（Windows 向けの syslog サーバ製品や、統合ログ管理製品）は、サポート窓口があり、導入支援やドキュメントも整っています。監査要件が厳しい環境や、ベンダーサポートを必須とする組織文化では有力な選択肢です。</p>
       <p>一方で、ライセンス費用は継続的に発生し、多くは受信ソース数やログ量に応じた課金体系のため、集約対象を増やすほど費用も増えます。「まずネットワーク機器のログを集めたい」という段階では、この費用が稟議の壁になりがちです。</p>
@@ -127,6 +130,8 @@
         <li>運用に要る技能は Windows サービス・SQL Server・Active Directory —— Windows 管理者が既に持っているものだけ</li>
       </ul>
       <p>逆に、大規模な分析基盤としての機能や、Linux 環境での稼働は守備範囲外です。適材適所の一つの選択肢として捉えてください。</p>
+
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
 
       <h2 id="hikaku">カテゴリ比較表</h2>
       <div class="table-scroll">
@@ -196,6 +201,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../windows-syslog-server/">Windows で無料の syslog サーバを構築する方法【OSS・設定ファイル不要】</a></p>
@@ -207,10 +214,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

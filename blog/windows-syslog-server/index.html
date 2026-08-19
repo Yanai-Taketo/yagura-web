@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,7 +49,7 @@
   }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -111,6 +112,8 @@
       <p>syslog サーバの選択肢は従来、商用製品（ライセンス費用が壁）か、rsyslog・syslog-ng といった Linux 系 OSS（Linux サーバの構築・運用スキルが壁）の二択でした。Windows 管理者にとってはどちらも一段の負担があります。</p>
       <p>Yagura はこの間を埋める選択肢です。単一の Windows サービスとして動き、運用に要るのは Windows サービス・SQL Server・Active Directory といった、<em>Windows 管理者が既に持っている技能だけ</em>。ライセンスは Apache License 2.0 の OSS で、費用は掛かりません。選定の比較検討は <a href="../syslog-server-selection/">「syslog サーバの選び方」</a>で詳しく扱っています。</p>
 
+      <div class="koukoku" data-koukoku="honbun-hajime"></div>
+
       <h2 id="install">手順一 — MSI をひとつ実行する</h2>
       <p><a href="../../#haifu">公式サイトの配布の段</a>（または <a href="https://github.com/Yanai-Taketo/Yagura/releases">GitHub Releases</a>）から MSI インストーラをダウンロードし、実行します。これだけで次がすべて済みます。</p>
       <ul>
@@ -135,6 +138,8 @@
         <li><strong>システム状態</strong> —— 受信・保存の統計と、取りこぼしの発生箇所別カウンタ</li>
       </ul>
       <p>表示テーマはライト・ダーク・OS 追従から選べ、時刻はサーバ OS のタイムゾーンでオフセット明示のうえ表示されます。「UTC か JST か分からないログ」を突き合わせる不毛な時間とは、ここでお別れです。</p>
+
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
 
       <h2 id="unyou">運用の初期設定 — 保持期間・通知・途絶検知</h2>
       <p>受信が回り始めたら、運用向けの設定を必要な分だけ重ねます（いずれも任意・opt-in です）。</p>
@@ -167,6 +172,8 @@
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../windows-eventlog-syslog/">Windows イベントログを syslog サーバへ集約する方法（Fluent Bit 活用）</a></p>
@@ -178,10 +185,12 @@
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>

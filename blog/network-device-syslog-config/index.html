@@ -20,6 +20,7 @@
   <link rel="icon" href="../../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../../images/favicon-180.png">
   <link rel="stylesheet" href="../../css/blog.css">
+  <link rel="stylesheet" href="../../css/koukoku.css">
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +70,7 @@
 }
   </script>
 </head>
-<body>
+<body data-root="../../">
 
 <a class="skip" href="#honbun">本文へ移動</a>
 <a class="daisen" href="../../" aria-label="Yagura トップへ">Yagura</a>
@@ -139,6 +140,8 @@ syslog host 192.0.2.10</code></pre>
       <p>ファイアウォールや無線 AP（コントローラ）、UPS のネットワークカードなどは、Web 管理画面で設定します。項目名は「ログ設定」「Syslog サーバ」「リモートログ」などさまざまですが、入力するのは先の三要素です。機器によっては、どのカテゴリのイベント（VPN、認証、システムなど）を送るかを選べるので、まず広めに送っておき、後で受信側の検索で絞る運用が扱いやすいでしょう。</p>
       <p>UPS は見落とされがちですが、電源異常・バッテリ劣化という「最も知りたい警告」を出す機器です。syslog 対応のネットワークカードが載っているなら、ぜひ集約対象に加えてください。</p>
 
+      <div class="koukoku" data-koukoku="honbun-naka"></div>
+
       <h2 id="level">レベル設定の落とし穴 — debug の洪水</h2>
       <p>「せっかくだから全部」と Debug（7）まで送ると、機器によっては毎秒大量のメッセージが流れ、サーバのディスクを圧迫し、肝心の警告が埋もれます。常用は Informational（6）まで、調査時だけ一時的に Debug へ下げる、が定石です。容量への影響は <a href="../syslog-disk-sizing/">ディスク容量見積もりの記事</a>で試算しています。</p>
 
@@ -159,6 +162,8 @@ syslog host 192.0.2.10</code></pre>
       </p>
     </aside>
 
+    <div class="koukoku" data-koukoku="kiji-shita"></div>
+
     <nav class="tsugi" aria-label="次の読みもの">
       <p class="fu">次に読む</p>
       <p><a href="../syslog-troubleshooting/">syslog が届かない・受信できないときの確認手順【チェックリスト】</a></p>
@@ -170,10 +175,12 @@ syslog host 192.0.2.10</code></pre>
 
 <footer class="okuzuke">
   <div class="okuzuke-in">
-    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a></p>
+    <p>Yagura（やぐら）は、Windows にそのまま置ける OSS の syslog 集約サーバ。<a href="../../">紹介の巻（トップ）</a> ／ <a href="../">読みもの一覧</a> ／ <a href="https://github.com/Yanai-Taketo/Yagura">GitHub</a> ／ <a href="../../privacy/">プライバシー・広告</a></p>
     <p class="cr">© YANAI Taketo</p>
   </div>
 </footer>
+
+<script src="../../js/koukoku.js" defer></script>
 
 </body>
 </html>
